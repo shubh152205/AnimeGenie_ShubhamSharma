@@ -18,6 +18,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+def read_root():
+    return {
+        "status": "online",
+        "message": "Welcome to the AnimeGenie ML Discovery & Intelligence API Backend!",
+        "version": "1.0.0",
+        "docs": "/docs"
+    }
+
 # Resolve paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_DIR = os.path.join(BASE_DIR, 'db')
