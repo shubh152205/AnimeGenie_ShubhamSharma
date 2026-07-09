@@ -27,7 +27,9 @@ import {
   AlertCircle
 } from 'lucide-react';
 
-const API_BASE = "http://127.0.0.1:8000/api";
+const API_BASE = import.meta.env.VITE_API_URL 
+  ? `${import.meta.env.VITE_API_URL}/api` 
+  : "http://127.0.0.1:8000/api";
 
 const WATCH_STAGES = [
   { id: "plan", label: "Plan to Watch", color: "bg-slate-100 border-slate-200 text-slate-700", dot: "bg-slate-400" },
