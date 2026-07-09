@@ -1,0 +1,26 @@
+# Node modules and build
+salesgenie/node_modules/
+salesgenie/dist/
+salesgenie/dist-ssr/
+salesgenie/*.local
+
+# Python caches
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.venv/
+venv/
+env/
+.env
+
+# Editor files
+.vscode/
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
