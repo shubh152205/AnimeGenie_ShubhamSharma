@@ -24,7 +24,9 @@ import {
   Share2,
   RefreshCw,
   HelpCircle,
-  AlertCircle
+  AlertCircle,
+  Menu,
+  ChevronLeft
 } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_URL 
@@ -40,8 +42,11 @@ const WATCH_STAGES = [
 ];
 
 function App() {
-  const [activeTab, setActiveTab] = useState("Catalog"); // Catalog, Watch Queue, AI Share, EDA Dashboard
+  const [activeTab, setActiveTab] = useState("Catalog");
   const [toast, setToast] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  // On mobile Catalog: false=list view, true=detail view
+  const [mobileShowDetail, setMobileShowDetail] = useState(false);
   
   // Catalog State
   const [animeList, setAnimeList] = useState([]);
@@ -249,6 +254,18 @@ function App() {
     showToast("Copied to clipboard!");
   };
 
+  // When tab changes on mobile, reset detail view
+  const handleTabChange = (name) => {
+    setActiveTab(name);
+    setSidebarOpen(false);
+    setMobileShowDetail(false);
+  };
+
+  const handleSelectAnime = (id) => {
+    setSelectedAnimeId(id);
+    setMobileShowDetail(true);
+  };
+
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#f3f4f6] text-slate-800 antialiased selection:bg-purple-100 selection:text-purple-900">
       
@@ -260,8 +277,18 @@ function App() {
         </div>
       )}
 
+      {/* Mobile overlay backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* COLUMN 1: LEFT NAVIGATION SIDEBAR */}
-      <aside className="flex w-64 flex-col justify-between border-r border-slate-800 bg-[#0f172a] text-slate-300">
+      <aside className={`fixed lg:relative z-40 flex flex-col justify-between border-r border-slate-800 bg-[#0f172a] text-slate-300 transition-transform duration-300 h-full ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      } w-64 shrink-0`}>
         <div>
           {/* Logo Brand area */}
           <div className="flex h-16 items-center gap-2.5 px-6 border-b border-slate-800/80">
@@ -287,7 +314,7 @@ function App() {
               return (
                 <button
                   key={item.name}
-                  onClick={() => setActiveTab(item.name)}
+                  onClick={() => handleTabChange(item.name)}
                   className={`flex w-full items-center gap-3.5 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 group relative ${
                     isActive
                       ? "bg-purple-600 text-white shadow-md shadow-purple-600/10"
@@ -329,14 +356,30 @@ function App() {
       </aside>
 
       {/* MAIN LAYOUT: CHOSEN TAB VIEW */}
-      <div className="flex flex-1 overflow-hidden">
-        
+      <div className="flex flex-1 flex-col overflow-hidden">
+
+        {/* Mobile Top Bar */}
+        <header className="flex lg:hidden items-center justify-between bg-[#0f172a] px-4 py-3 shrink-0">
+          <button onClick={() => setSidebarOpen(true)} className="text-white p-1">
+            <Menu className="h-6 w-6" />
+          </button>
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-tr from-purple-500 to-violet-500">
+              <Sparkles className="h-3.5 w-3.5 text-white" />
+            </div>
+            <span className="text-sm font-bold text-white">AnimeGenie</span>
+          </div>
+          <div className="w-8" />
+        </header>
+
+        <div className="flex flex-1 overflow-hidden">
+
         {/* TAB 1: CATALOG TAB */}
         {activeTab === "Catalog" && (
           <div className="flex flex-1 overflow-hidden">
             
-            {/* COLUMN 2: ANIME LIST (MIDDLE PANEL) */}
-            <section className="flex w-96 flex-col border-r border-slate-200 bg-white">
+            {/* COLUMN 2: ANIME LIST (MIDDLE PANEL) - hidden on mobile when detail is shown */}
+            <section className={`flex flex-col border-r border-slate-200 bg-white ${mobileShowDetail ? 'hidden md:flex' : 'flex'} w-full md:w-80 lg:w-96 shrink-0`}>
               {/* Header Area */}
               <div className="p-4 border-b border-slate-100 flex flex-col gap-3 shrink-0">
                 <div className="flex items-center justify-between">
@@ -427,7 +470,7 @@ function App() {
                     return (
                       <div
                         key={a.anime_id}
-                        onClick={() => setSelectedAnimeId(a.anime_id)}
+                        onClick={() => handleSelectAnime(a.anime_id)}
                         className={`flex gap-3 rounded-xl border p-3 transition-all duration-200 cursor-pointer group ${
                           isActive
                             ? "bg-purple-50/40 border-purple-200 shadow-xs"
@@ -506,8 +549,8 @@ function App() {
               </div>
             </section>
 
-            {/* COLUMN 3: DETAILED ANIME VIEW (RIGHT MAIN PANEL) */}
-            <main className="flex-1 bg-[#f8fafc] overflow-y-auto flex flex-col">
+            {/* COLUMN 3: DETAILED ANIME VIEW - hidden on mobile when list is shown */}
+            <main className={`flex-1 bg-[#f8fafc] overflow-y-auto flex flex-col ${!mobileShowDetail ? 'hidden md:flex' : 'flex'}`}>
               {loadingDetail ? (
                 <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
                   <RefreshCw className="h-10 w-10 text-purple-600 animate-spin" />
@@ -516,8 +559,15 @@ function App() {
               ) : animeDetail ? (
                 <>
                   {/* Sticky Detail Header */}
-                  <div className="sticky top-0 z-10 flex items-center justify-between bg-white/80 border-b border-slate-200/60 p-5 backdrop-blur-md">
-                    <div className="flex items-center gap-4">
+                  <div className="sticky top-0 z-10 flex items-center justify-between bg-white/80 border-b border-slate-200/60 p-3 md:p-5 backdrop-blur-md">
+                    <div className="flex items-center gap-2 md:gap-4">
+                      {/* Back button: mobile only */}
+                      <button
+                        onClick={() => setMobileShowDetail(false)}
+                        className="flex md:hidden items-center justify-center h-8 w-8 rounded-lg bg-slate-100 text-slate-600 shrink-0"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
                       <div className="h-12 w-9 shrink-0 overflow-hidden rounded bg-slate-100 shadow-sm border border-slate-100">
                         <img src={animeDetail.image_url} alt={animeDetail.title} className="h-full w-full object-cover" />
                       </div>
@@ -536,7 +586,7 @@ function App() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 md:gap-2">
                       {/* Track / Stage selector */}
                       <select
                         onChange={(e) => {
@@ -545,7 +595,7 @@ function App() {
                             e.target.value = "";
                           }
                         }}
-                        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none"
+                        className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 md:px-3 md:py-2 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none max-w-[130px] md:max-w-none"
                       >
                         <option value="">+ Add to Watch Queue</option>
                         {WATCH_STAGES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
@@ -554,18 +604,19 @@ function App() {
                       <button
                         onClick={() => {
                           setShareAnime(animeDetail);
-                          setActiveTab("AI Share Workspace");
+                          handleTabChange("AI Share Workspace");
                         }}
-                        className="flex items-center gap-1.5 rounded-lg bg-purple-600 px-3.5 py-2 text-xs font-bold text-white shadow-md shadow-purple-600/10 hover:bg-purple-700 focus:outline-none"
+                        className="flex items-center gap-1.5 rounded-lg bg-purple-600 px-2.5 py-1.5 md:px-3.5 md:py-2 text-xs font-bold text-white shadow-md shadow-purple-600/10 hover:bg-purple-700 focus:outline-none"
                       >
                         <Share2 className="h-3.5 w-3.5" />
-                        <span>Share AI Post</span>
+                        <span className="hidden sm:inline">Share AI Post</span>
+                        <span className="sm:hidden">Share</span>
                       </button>
                     </div>
                   </div>
 
                   {/* Main Detail Body Content */}
-                  <div className="p-5 space-y-5">
+                  <div className="p-3 md:p-5 space-y-4 md:space-y-5">
                     
                     {/* circular Affinity Gauge and Key Stats */}
                     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -605,7 +656,7 @@ function App() {
                       </div>
 
                       {/* Stats Column cards */}
-                      <div className="col-span-2 grid grid-cols-4 gap-3">
+                      <div className="col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-3">
                         {[
                           { label: "Rating", value: `★ ${animeDetail.score.toFixed(2)}`, sub: "MAL Score", color: "text-amber-500 bg-amber-50 border-amber-100" },
                           { label: "Ranked", value: animeDetail.rank ? `#${animeDetail.rank}` : "-", sub: "Global ranking", color: "text-purple-600 bg-purple-50 border-purple-100" },
@@ -783,9 +834,9 @@ function App() {
           </div>
         )}
 
-        {/* TAB 2: WATCH QUEUE TAB (Kanban board pipeline) */}
+        {/* TAB 2: WATCH QUEUE TAB */}
         {activeTab === "Watch Queue" && (
-          <div className="flex-1 flex flex-col bg-[#f8fafc] overflow-y-auto p-6">
+          <div className="flex-1 flex flex-col bg-[#f8fafc] overflow-y-auto p-3 md:p-6">
             <div className="flex items-center justify-between border-b border-slate-200 pb-4 mb-6">
               <div>
                 <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Watch Queue Tracker</h2>
@@ -801,12 +852,12 @@ function App() {
             </div>
 
             {/* Kanban columns */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-start">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 items-start">
               {WATCH_STAGES.map(stage => {
                 const items = watchQueue.filter(item => item.stage === stage.id);
                 
                 return (
-                  <div key={stage.id} className="rounded-xl border border-slate-200/60 bg-white p-3.5 shadow-xs flex flex-col min-h-[450px]">
+                  <div key={stage.id} className="rounded-xl border border-slate-200/60 bg-white p-3.5 shadow-xs flex flex-col min-h-[200px] md:min-h-[400px]">
                     {/* Header */}
                     <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-3 shrink-0">
                       <div className="flex items-center gap-1.5">
@@ -889,7 +940,7 @@ function App() {
 
         {/* TAB 3: AI SHARE WORKSPACE TAB */}
         {activeTab === "AI Share Workspace" && (
-          <div className="flex-1 flex flex-col bg-[#f8fafc] overflow-y-auto p-6">
+          <div className="flex-1 flex flex-col bg-[#f8fafc] overflow-y-auto p-3 md:p-6">
             <div className="border-b border-slate-200 pb-4 mb-6">
               <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">AI Genie Share Workspace</h2>
               <p className="text-xs text-slate-500 font-medium">Draft personalized watch recommendations and custom summaries using AI styles</p>
@@ -1034,7 +1085,7 @@ function App() {
 
         {/* TAB 4: EDA DASHBOARD TAB */}
         {activeTab === "EDA Dashboard" && (
-          <div className="flex-1 flex flex-col bg-[#f8fafc] overflow-y-auto p-6">
+          <div className="flex-1 flex flex-col bg-[#f8fafc] overflow-y-auto p-3 md:p-6">
             <div className="flex items-center justify-between border-b border-slate-200 pb-4 mb-6">
               <div>
                 <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Exploratory Data Analysis (EDA)</h2>
@@ -1063,7 +1114,7 @@ function App() {
               <div className="space-y-6">
                 
                 {/* Stats Counters Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-4">
                   {[
                     { label: "Total Anime", value: analytics.stats.total_anime.toLocaleString(), sub: "In database", color: "border-purple-100 bg-white" },
                     { label: "Avg Rating", value: `${analytics.stats.avg_score} / 10`, sub: "Non-zero scores", color: "border-indigo-100 bg-white" },
@@ -1231,6 +1282,33 @@ function App() {
             )}
           </div>
         )}
+
+        </div>{/* end inner flex */}
+
+        {/* Mobile Bottom Navigation Bar */}
+        <nav className="flex lg:hidden shrink-0 bg-[#0f172a] border-t border-slate-800">
+          {[
+            { name: "Catalog", icon: Film },
+            { name: "Watch Queue", icon: Layers },
+            { name: "AI Share Workspace", icon: Send },
+            { name: "EDA Dashboard", icon: LayoutDashboard }
+          ].map(item => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.name;
+            return (
+              <button
+                key={item.name}
+                onClick={() => handleTabChange(item.name)}
+                className={`flex flex-1 flex-col items-center justify-center py-2 gap-0.5 text-[9px] font-bold uppercase tracking-wide transition-colors ${
+                  isActive ? 'text-purple-400' : 'text-slate-500 hover:text-slate-300'
+                }`}
+              >
+                <Icon className="h-5 w-5" />
+                <span className="hidden xs:inline">{item.name.split(' ')[0]}</span>
+              </button>
+            );
+          })}
+        </nav>
 
       </div>
 
