@@ -1,6 +1,6 @@
-# AnimeGenie AI: ML Discovery & Intelligence Engine
+# 🌌 AppleSalesGennie AI: Sales Intelligence & Deal Analytics Platform
 
-AnimeGenie AI is a fully functional web application that replaces the original `SalesGenie` template. It utilizes a Python FastAPI backend to process a dataset of 10,000 anime records and implements content-based machine learning recommendations. The frontend is a modern React web application styled with glassmorphic purple themes.
+AppleSalesGennie AI is a premium, full-stack web application designed for chocolate sales transaction tracking, pipeline management, and AI-powered sales enablement. Built to replace basic static spreadsheets, it combines a robust **Python FastAPI backend** executing machine learning similarity matching algorithms on chocolate sales records with a beautiful, responsive **React + Tailwind CSS frontend** implementing a glassmorphic dashboard interface.
 
 ---
 
@@ -8,44 +8,108 @@ AnimeGenie AI is a fully functional web application that replaces the original `
 
 ```mermaid
 graph TD
-    A[Vite/React Frontend] -->|REST APIs| B[FastAPI Backend Server]
-    B -->|Parse & Clean| C[(MyAnimeList Dataset DB)]
-    B -->|TF-IDF fit| D[ML Recommendation Engine]
-    D -->|Cosine Similarity| B
+    A[Vite / React Frontend] -->|REST APIs| B[FastAPI Backend Server]
+    B -->|Parse & Clean CSVs| C[(Cleaned Chocolate Sales DB)]
+    B -->|Compute TF-IDF Matrix| D[ML Similarity Engine]
+    D -->|Cosine Similarity Scores| B
+    B -->|JSON Response| A
+    A -->|Store Deals| E[(Local Storage Pipeline)]
 ```
 
-### 1. Python Machine Learning Backend (`server.py`)
-- **FastAPI Framework**: Exposes low-latency endpoints for querying the dataset.
-- **Relational Joining Engine**: Dynamically matches anime IDs against multiple CSV relations (genres, studios, characters, voice actors, staff).
-- **ML Recommender**: Fits a `TfidfVectorizer` over title text, genres, studio names, and synopsis keywords on startup. Uses `sklearn.metrics.pairwise.linear_kernel` to calculate cosine similarities on the fly in under `0.1s`.
+---
 
-### 2. React Frontend (`App.jsx`)
-- **Anime Catalog**: A search and filtering middle panel alongside a detailed view. Shows a dynamic **Genie Affinity Match Score** computed against the user's genre preferences.
-- **Watch Queue Tracker**: A visual Kanban pipeline mapping stages like *Plan to Watch*, *Watching*, *On Hold*, *Completed*, and *Dropped* (analogous to the original Lead Stage Tracker). Persists in `localStorage`.
-- **AI Share Workspace**: Allows users to draft recommendation posts with customizable channels (WhatsApp, Discord, Social) and tones (Casual, Analytical, Excited, Poetic).
-- **EDA Dashboard**: Interactive, custom SVG charts for data exploration:
-  - Top 10 Genres (Anime Count)
-  - Rating Performance by Format
-  - Score vs Popularity Rank Correlation Scatter Plot
-  - Anime Production Volume Trends (1990–2026)
-  - Top 10 Studios by output and score (with placeholder filter cleanups)
+## 🌟 Key Features
+
+### 1. 🔍 Interactive Sales Explorer
+*   **Search & Multi-Filtering:** Instantly filter deals by Sales Representative, Product name, and Target market country (e.g. UK, USA, Canada, India).
+*   **Dynamic Sorting:** Sort on the fly by Date, Revenue (Amount), or Volume (Boxes Shipped).
+*   **AI Deal Quality Score:** Evaluates transaction metrics dynamically against targeted focus chocolate categories to compute a quality/margin compatibility percentage ($0\% - 100\%$) categorized into Match Levels (Premium Value Deal, High Performance, Optimal Volume, Low Margin Deal).
+*   **Detailed Insights Overlay:** Visualizes salesperson rank, lifetime total sales, transaction volume metrics, unit values ($/box), and regional export channels.
+
+### 2. 📋 Deal Pipeline Kanban Tracker
+*   **Pipeline Stages:** Track custom active deals across stages including *Lead / Prospect*, *Contacted*, *Proposal Sent*, *Negotiation*, and *Closed Won*.
+*   **Local Persistence:** Uses `localStorage` under `applesalesgennie_pipeline` so your active deals are persisted across browser reloads.
+
+### 3. 🤖 AI Pitch Generator Workspace
+*   **Contextual Pitch Drafting:** Automatically formulates customized client follow-up and sales messages using transaction metadata.
+*   **Channel Customization:** Adjust formatting automatically for **Email** (formal header/subject), **WhatsApp** (bolding, symbols), or **LinkedIn** (professional networking note).
+*   **Tone Customizer:** Select from multiple professional settings including *Persuasive*, *Professional*, *Friendly*, or *Urgent* to tailor the outreach copy.
+
+### 4. 📊 Sales Performance Analytics Dashboard
+Custom-crafted responsive SVG charts that dynamically render analytics fetched from the sales dataset:
+*   **Product Revenue Share:** Top products ranked by total revenue contribution.
+*   **Market Performance by Country:** Regional deal density and average deal sizes across export markets.
+*   **Revenue vs. Quantities Correlation:** Scatter plot mapping quantity shipped (boxes) against total deal revenue to identify margin optimization.
+*   **Monthly Revenue Trends:** Line chart visualizing transaction volume spikes and periodic fiscal trends.
+*   **Sales Representative Rankings:** Renders sales agents ranked by volume, deals closed, and average transaction values.
+
+---
+
+## 🛠️ Technology Stack
+
+### Backend (API & ML Engine)
+*   **FastAPI:** High-performance, low-latency web framework for building APIs with Python.
+*   **Uvicorn:** ASGI web server implementation.
+*   **Pandas & NumPy:** Data manipulation and cleansing of relational tables.
+*   **Scikit-Learn:** Employs `TfidfVectorizer` to tokenize transaction metadata (salesperson, product, country, date). Computes pairwise `linear_kernel` (Cosine Similarity) over vectors on the fly in $< 0.1\text{s}$ to recommend similar sales context.
+
+### Frontend (User Interface)
+*   **Vite + React:** Fast and optimized React development environment.
+*   **Tailwind CSS:** Modern utility-first CSS styling with customized dark-slate theme palettes.
+*   **Lucide React:** Sleek, consistent line icon system.
+*   **Vanilla SVG Charts:** Custom responsive SVGs for charts.
+
+---
+
+## 📡 API Reference
+
+The backend provides several REST endpoints:
+
+| Endpoint | Method | Description |
+| :--- | :---: | :--- |
+| `/` | `GET` | Server status and documentation links. |
+| `/api/products` | `GET` | Fetches a sorted list of unique products. |
+| `/api/countries` | `GET` | Fetches a sorted list of unique destination markets. |
+| `/api/sales` | `GET` | Fetches a paginated, filtered, and sorted list of sales transactions. |
+| `/api/sales/{transaction_id}` | `GET` | Retrieves detailed metadata, representative rank, lifetime sales, and pricing details. |
+| `/api/sales/{transaction_id}/recommendations` | `GET` | Returns top similar transactions using the similarity matching engine. |
+| `/api/analytics` | `GET` | Computes statistical summaries and data distributions for charts. |
+| `/api/generate-pitch` | `POST` | Generates a custom styled client pitch based on tone, channel, and client. |
 
 ---
 
 ## 🚀 How to Run the Project
 
-Both the backend and frontend servers are currently running in the background. If you need to restart them in the future:
+### Prerequisites
+*   Python 3.8+
+*   Node.js 18+ & npm
 
-### Step 1: Start the Python Backend
-Run from the `salesgenie/backend` directory:
-```bash
-python3 server.py
-```
-*Runs on `http://127.0.0.1:8000`*
+### Step 1: Run the Backend Server
+1. Navigate to the backend directory:
+   ```bash
+   cd salesgenie/backend
+   ```
+2. Install Python dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Launch the FastAPI server:
+   ```bash
+   python3 server.py
+   ```
+*The backend API documentation will be available at `http://127.0.0.1:8000/docs`.*
 
-### Step 2: Start the React Frontend
-Run from the `salesgenie` directory:
-```bash
-npm run dev
-```
-*Runs on `http://localhost:5173/`*
+### Step 2: Run the Frontend App
+1. Navigate to the frontend root directory:
+   ```bash
+   cd salesgenie
+   ```
+2. Install Node dependencies:
+   ```bash
+   npm install
+   ```
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
+*Open `http://localhost:5173/` in your browser to view the application.*
