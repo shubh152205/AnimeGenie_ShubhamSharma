@@ -1,6 +1,6 @@
-# 🌌 AppleSalesGennie AI: Sales Intelligence & Deal Analytics Platform
+# 🌌 SalesGenie AI: B2B Lead Intelligence & CRM Deal Analytics Platform
 
-AppleSalesGennie AI is a premium, full-stack web application designed for chocolate sales transaction tracking, pipeline management, and AI-powered sales enablement. Built to replace basic static spreadsheets, it combines a robust **Python FastAPI backend** executing machine learning similarity matching algorithms on chocolate sales records with a beautiful, responsive **React + Tailwind CSS frontend** implementing a glassmorphic dashboard interface.
+SalesGenie AI is a premium, full-stack web application designed for B2B CRM lead tracking, pipeline management, and AI-enabled sales outreach. It combines a robust **Python FastAPI backend** executing machine learning similarity matching algorithms on historical deals with a beautiful, responsive **React + Tailwind CSS frontend** implementing a glassmorphic dashboard interface.
 
 ---
 
@@ -9,39 +9,38 @@ AppleSalesGennie AI is a premium, full-stack web application designed for chocol
 ```mermaid
 graph TD
     A[Vite / React Frontend] -->|REST APIs| B[FastAPI Backend Server]
-    B -->|Parse & Clean CSVs| C[(Cleaned Chocolate Sales DB)]
-    B -->|Compute TF-IDF Matrix| D[ML Similarity Engine]
+    B -->|Query / Mutate| C[(SQLite database.db)]
+    B -->|Compute TF-IDF Matrix| D[ML Recommendation Engine]
     D -->|Cosine Similarity Scores| B
     B -->|JSON Response| A
-    A -->|Store Deals| E[(Local Storage Pipeline)]
 ```
 
 ---
 
 ## 🌟 Key Features
 
-### 1. 🔍 Interactive Sales Explorer
-*   **Search & Multi-Filtering:** Instantly filter deals by Sales Representative, Product name, and Target market country (e.g. UK, USA, Canada, India).
-*   **Dynamic Sorting:** Sort on the fly by Date, Revenue (Amount), or Volume (Boxes Shipped).
-*   **AI Deal Quality Score:** Evaluates transaction metrics dynamically against targeted focus chocolate categories to compute a quality/margin compatibility percentage ($0\% - 100\%$) categorized into Match Levels (Premium Value Deal, High Performance, Optimal Volume, Low Margin Deal).
-*   **Detailed Insights Overlay:** Visualizes salesperson rank, lifetime total sales, transaction volume metrics, unit values ($/box), and regional export channels.
+### 1. 🔍 Interactive Leads Explorer
+*   **Search & Multi-Filtering:** Instantly filter prospect leads by Company Name, Contact Name, and Industry.
+*   **Dynamic Sorting:** Sort leads on the fly by Score, Company Name, and Location.
+*   **Rule-Based & ML-Enhanced Scoring:** Evaluates prospect parameters (company size, industry, email opens, website visits, demo requests) to generate a Lead Score ($0 - 100$) and Categorize them (Hot Lead, Warm Lead, Cold Lead, Low Priority).
+*   **Detailed Insights & Activity Logging:** Register new activities (calls, emails, meetings, demos) that automatically update stages, scores, and categories.
 
 ### 2. 📋 Deal Pipeline Kanban Tracker
-*   **Pipeline Stages:** Track custom active deals across stages including *Lead / Prospect*, *Contacted*, *Proposal Sent*, *Negotiation*, and *Closed Won*.
-*   **Local Persistence:** Uses `localStorage` under `applesalesgennie_pipeline` so your active deals are persisted across browser reloads.
+*   **Pipeline Stages:** Manage prospect progress across stages: *Lead*, *Contacted*, *Demo Scheduled*, *Proposal Sent*, *Negotiation*, *Closed Won*, and *Closed Lost*.
+*   **Real-time Synchronization:** Move cards dynamically across lanes, which synchronizes updates directly to the database via API requests.
 
-### 3. 🤖 AI Pitch Generator Workspace
-*   **Contextual Pitch Drafting:** Automatically formulates customized client follow-up and sales messages using transaction metadata.
-*   **Channel Customization:** Adjust formatting automatically for **Email** (formal header/subject), **WhatsApp** (bolding, symbols), or **LinkedIn** (professional networking note).
-*   **Tone Customizer:** Select from multiple professional settings including *Persuasive*, *Professional*, *Friendly*, or *Urgent* to tailor the outreach copy.
+### 3. 🤖 AI Outreach Generator Workspace
+*   **Contextual Pitch Drafting:** Automatically formulates customized client follow-up and sales messages using prospect metadata and core pain points.
+*   **Channel Customization:** Adjust formatting automatically for **Email** (formal subject & headers), **WhatsApp** (including emojis and bolding), **LinkedIn** (professional networking note), or **SMS** (concise, under 300 characters).
+*   **Tone Customizer:** Select from multiple settings including *Professional*, *Persuasive*, *Friendly*, or *Urgent*.
 
-### 4. 📊 Sales Performance Analytics Dashboard
-Custom-crafted responsive SVG charts that dynamically render analytics fetched from the sales dataset:
-*   **Product Revenue Share:** Top products ranked by total revenue contribution.
-*   **Market Performance by Country:** Regional deal density and average deal sizes across export markets.
-*   **Revenue vs. Quantities Correlation:** Scatter plot mapping quantity shipped (boxes) against total deal revenue to identify margin optimization.
-*   **Monthly Revenue Trends:** Line chart visualizing transaction volume spikes and periodic fiscal trends.
-*   **Sales Representative Rankings:** Renders sales agents ranked by volume, deals closed, and average transaction values.
+### 4. 📊 Lead Performance Analytics Dashboard
+Custom-crafted responsive charts and summaries rendering analytics fetched from the database:
+*   **Total Leads & Hot Leads:** Live counters of active prospects.
+*   **Average Score & Conversion Rate:** Insights on pipeline quality.
+*   **Stage & Industry Distributions:** Counts across categories.
+*   **Location Analysis:** Average lead score and counts by city.
+*   **Scatter Plot Analysis:** Engagement (Visits vs. Opens) mapped to company revenue.
 
 ---
 
@@ -50,14 +49,13 @@ Custom-crafted responsive SVG charts that dynamically render analytics fetched f
 ### Backend (API & ML Engine)
 *   **FastAPI:** High-performance, low-latency web framework for building APIs with Python.
 *   **Uvicorn:** ASGI web server implementation.
-*   **Pandas & NumPy:** Data manipulation and cleansing of relational tables.
-*   **Scikit-Learn:** Employs `TfidfVectorizer` to tokenize transaction metadata (salesperson, product, country, date). Computes pairwise `linear_kernel` (Cosine Similarity) over vectors on the fly in $< 0.1\text{s}$ to recommend similar sales context.
+*   **SQLite:** Relational database with pre-seeded B2B lead profiles.
+*   **Scikit-Learn:** Employs `TfidfVectorizer` and Cosine Similarity (`linear_kernel`) to match active leads with historic converted deals based on tech stack and industry alignment.
 
 ### Frontend (User Interface)
 *   **Vite + React:** Fast and optimized React development environment.
-*   **Tailwind CSS:** Modern utility-first CSS styling with customized dark-slate theme palettes.
+*   **Tailwind CSS:** Modern utility-first CSS styling.
 *   **Lucide React:** Sleek, consistent line icon system.
-*   **Vanilla SVG Charts:** Custom responsive SVGs for charts.
 
 ---
 
@@ -68,13 +66,14 @@ The backend provides several REST endpoints:
 | Endpoint | Method | Description |
 | :--- | :---: | :--- |
 | `/` | `GET` | Server status and documentation links. |
-| `/api/products` | `GET` | Fetches a sorted list of unique products. |
-| `/api/countries` | `GET` | Fetches a sorted list of unique destination markets. |
-| `/api/sales` | `GET` | Fetches a paginated, filtered, and sorted list of sales transactions. |
-| `/api/sales/{transaction_id}` | `GET` | Retrieves detailed metadata, representative rank, lifetime sales, and pricing details. |
-| `/api/sales/{transaction_id}/recommendations` | `GET` | Returns top similar transactions using the similarity matching engine. |
+| `/api/leads` | `GET` | Fetches a filtered and sorted list of prospect leads. |
+| `/api/leads` | `POST` | Registers a new B2B prospect lead, calculating its score. |
+| `/api/leads/{id}` | `GET` | Retrieves detailed metadata, history, and similar converted deals. |
+| `/api/leads/{id}` | `PUT` | Updates a lead's metadata, recalculating its score. |
+| `/api/leads/{id}` | `DELETE` | Removes a lead from the CRM database. |
+| `/api/leads/{id}/activities` | `POST` | Logs a new activity (call, email, demo, etc.), auto-progressing the stage. |
+| `/api/generate-outreach` | `POST` | Generates a custom styled client outreach message. |
 | `/api/analytics` | `GET` | Computes statistical summaries and data distributions for charts. |
-| `/api/generate-pitch` | `POST` | Generates a custom styled client pitch based on tone, channel, and client. |
 
 ---
 
@@ -87,7 +86,7 @@ The backend provides several REST endpoints:
 ### Step 1: Run the Backend Server
 1. Navigate to the backend directory:
    ```bash
-   cd salesgenie/backend
+   cd backend
    ```
 2. Install Python dependencies:
    ```bash
@@ -95,14 +94,14 @@ The backend provides several REST endpoints:
    ```
 3. Launch the FastAPI server:
    ```bash
-   python3 server.py
+   python server.py
    ```
 *The backend API documentation will be available at `http://127.0.0.1:8000/docs`.*
 
 ### Step 2: Run the Frontend App
 1. Navigate to the frontend root directory:
    ```bash
-   cd salesgenie
+   cd ..
    ```
 2. Install Node dependencies:
    ```bash
