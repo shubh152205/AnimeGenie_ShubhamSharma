@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
 
 from database import fetchall, fetchone
 
@@ -9,7 +9,7 @@ from database import fetchall, fetchone
 OUR_PRODUCT_STACK = {"AWS", "Python", "React", "PostgreSQL", "Salesforce", "Kubernetes"}
 
 # Global ML Model reference
-_ml_model: DecisionTreeClassifier = None
+_ml_model: RandomForestClassifier = None
 
 
 # ---------------------------------------------------------------------------
@@ -89,11 +89,11 @@ def get_next_action(score: int) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Decision Tree Classifier (Conversion Prediction)
+# Random Forest Classifier (Conversion Prediction)
 # ---------------------------------------------------------------------------
 
 def retrain_ml_model():
-    """Train DecisionTreeClassifier from live CRM lead engagement logs."""
+    """Train RandomForestClassifier from live CRM lead engagement logs."""
     global _ml_model
 
     rows = fetchall("SELECT email_opens, website_visits, demo_request, converted FROM leads")
@@ -103,9 +103,9 @@ def retrain_ml_model():
         X = np.array([[r[0], r[1], r[2]] for r in rows])
         y = np.array([r[3] for r in rows])
         if len(np.unique(y)) > 1:
-            _ml_model = DecisionTreeClassifier(random_state=42)
+            _ml_model = RandomForestClassifier(n_estimators=100, random_state=42)
             _ml_model.fit(X, y)
-            print(f"ML DecisionTree Model retrained successfully on {len(rows)} leads.")
+            print(f"ML Random Forest Model retrained successfully on {len(rows)} leads.")
             return
 
     # Synthetic fallback model
@@ -115,7 +115,7 @@ def retrain_ml_model():
         [6, 8, 0], [5, 6, 0], [11, 16, 1], [0, 1, 0], [7, 10, 0]
     ])
     y_fallback = np.array([1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0])
-    _ml_model = DecisionTreeClassifier(random_state=42)
+    _ml_model = RandomForestClassifier(n_estimators=100, random_state=42)
     _ml_model.fit(X_fallback, y_fallback)
     print("Fallback ML model fitted.")
 

@@ -18,7 +18,7 @@ export default function MLConversionCard({ mlProb }) {
             style={{ width: `${mlProb}%` }}
           />
         </div>
-        <span className="text-[8.5px] text-slate-400 font-bold mt-1.5 block text-right">DecisionTree Classifier Prediction</span>
+        <span className="text-[8.5px] text-slate-400 font-bold mt-1.5 block text-right">Random Forest Classifier Prediction</span>
       </div>
     </div>
   );
