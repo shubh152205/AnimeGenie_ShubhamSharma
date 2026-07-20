@@ -1,4 +1,6 @@
-fastapi
+fastapi>=0.115.0
 uvicorn
 pandas
 scikit-learn
+pytest
+httpx

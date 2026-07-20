@@ -1,0 +1,2838 @@
+==================================================
+FILE: 2_Pandas_Library_Introduction.pptx
+==================================================
+
+--- Slide 1 ---
+Pandas Library
+An Introduction to Data Analysis in Python
+
+--- Slide 2 ---
+What is Pandas?
+Open-source Python library for data analysis and manipulation
+Built on top of NumPy
+Provides data structures: Series (1D) and DataFrame (2D)
+Ideal for tabular, time-series and heterogeneous data
+
+--- Slide 3 ---
+Core Data Structures
+• Series: One-dimensional labeled array
+DataFrame: Two-dimensional labeled data structure
+Index objects: For labeling axes
+
+--- Slide 4 ---
+import pandas as pd
+
+# Create a Series
+s = pd.Series([10, 20, 30], index=['a', 'b', 'c'])
+print(s)
+
+s.values
+s.index
+
+--- Slide 5 ---
+data = {
+    'Name': ['Alice', 'Bob', 'Charlie'],
+    'Age': [24, 27, 22],
+    'City': ['Delhi', 'Mumbai', 'Chennai']
+}
+
+df = pd.DataFrame(data)
+print(df)
+
+--- Slide 6 ---
+df.head() → first 5 rows
+df.tail() → last 5 rows
+df.shape → (rows, columns)
+df.columns → column names
+df.info() → data types, null counts
+df.describe() → quick stats on numeric columns
+
+--- Slide 7 ---
+Reading and Writing Data
+Read from CSV: pd.read_csv('file.csv')
+Read from Excel: pd.read_excel('file.xlsx')
+Save to CSV: df.to_csv('file.csv', index=False)
+
+--- Slide 8 ---
+Selecting Data
+Select columns: df['column'] or df[['col1','col2']]
+Select rows: df.loc[index] or df.iloc[position]
+Conditional selection: df[df['Age'] > 25]
+
+--- Slide 9 ---
+Basic operations
+df['NewCol'] = df['Age'] + 5           # add new column
+df.drop('NewCol', axis=1, inplace=True)  # drop column
+df.rename(columns={'Name': 'FullName'}, inplace=True)  # rename
+df.sort_values('Age', ascending=False)  # sort
+df.reset_index(drop=True, inplace=True) # reset index
+
+--- Slide 10 ---
+Data Cleaning Steps--1. Handle Missing Values
+df.isnull().sum()               # count nulls
+df.dropna(inplace=True)         # drop rows with any null
+df.fillna(0, inplace=True)      # fill null with 0
+df['Age'].fillna(df['Age'].mean(), inplace=True)  # fill with mean
+
+--- Slide 11 ---
+Data Cleaning Steps--2.Handle Duplicates
+df.duplicated().sum()      # how many duplicates
+df.drop_duplicates(inplace=True)   # remove duplicates
+
+--- Slide 12 ---
+Data Cleaning Steps--3.Handle Data Types
+df.dtypes                  # check types
+df['Age'] = df['Age'].astype(int)   # convert type
+df['Date'] = pd.to_datetime(df['Date'])  # convert to datetime
+
+--- Slide 13 ---
+Data Cleaning Steps--4. Handle Outliers
+Detect:
+df['Age'].describe()     # check min, max, quartiles
+Filter out:
+df = df[df['Age'] < 100] # remove unreasonable ages
+
+--- Slide 14 ---
+Data Cleaning Steps—5. String Operations
+df['City'] = df['City'].str.strip()       # remove whitespace
+df['City'] = df['City'].str.lower()       # to lowercase
+df['City'] = df['City'].str.replace('mumbai','Mumbai')
+
+--- Slide 15 ---
+Data Cleaning Steps—6. Encoding Categorical Variables
+# One-hot encoding
+pd.get_dummies(df['City'])  
+
+# Label encoding
+from sklearn.preprocessing import LabelEncoder
+le = LabelEncoder()
+df['City_encoded'] = le.fit_transform(df['City'])
+
+--- Slide 16 ---
+Data Cleaning Steps—7. Handling Large Datasets
+Use df.info(memory_usage='deep') to check memory usage.
+Load partially:
+pd.read_csv('data.csv', nrows=1000)
+Chunk loading:
+for chunk in pd.read_csv('data.csv', chunksize=5000):
+  process(chunk)
+
+--- Slide 17 ---
+Data Analysis with Pandas
+Summary statistics: describe(), mean(), sum()
+Grouping: groupby()
+Sorting: sort_values()
+Merging/Joining: merge(), concat()
+
+--- Slide 18 ---
+Visualization
+Basic plotting: df.plot()
+Histogram: df['col'].hist()
+Integration with Matplotlib and Seaborn for advanced plots
+
+--- Slide 19 ---
+Summary
+Pandas simplifies data handling in Python
+Provides powerful data structures and functions
+Essential for data science and machine learning projects
+
+
+
+==================================================
+FILE: 3_matplotlib and seaborn.pptx
+==================================================
+
+--- Slide 1 ---
+Matplotlib & Seaborn
+Data Visualization in Python
+
+--- Slide 2 ---
+Data Visualization in Exploratory Data Analysis (EDA)
+EDA is the first step in analyzing any dataset.
+It helps you understand the structure, relationships, and patterns in the data.
+It includes: Descriptive statistics (mean, median, std. deviation, etc.)Data visualization (graphs, plots, charts)
+
+--- Slide 3 ---
+Role of Data Visualization in EDA
+Visualization makes it easy to:
+Detect patterns and trends
+Spot outliers/anomalies
+Understand distributions
+Compare variables (correlations & relationships)
+
+--- Slide 4 ---
+Common Visualization Techniques for EDA
+1. Univariate Analysis (Single Variable)
+Histogram → Distribution of a numeric variable
+Boxplot → Spread, quartiles, outliers
+Bar chart → Frequency of categorical data
+
+2. Bivariate Analysis (Two Variables)
+Scatter Plot → Relationship between two numerical variables
+Line Plot → Trends over time
+Grouped Barplot → Compare categories
+
+3. Multivariate Analysis (Multiple Variables)
+Pairplot (Seaborn) → Relationship between multiple variables
+Heatmap → Correlation matrix
+Stacked Barplot / Multiple Line Plots → Compare across groups
+
+--- Slide 5 ---
+Key Insights You Can Get
+Distribution → Is the data normal, skewed, or has outliers?
+Relationships → Are two variables correlated? (e.g., bill vs tip)
+Categorical Comparisons → Which group spends more?
+Trends → How values change with time or category.
+
+--- Slide 6 ---
+Matplotlib -Introduction
+Matplotlib is a powerful data visualization library in Python.
+It helps create 2D plots, charts, and figures.
+Works seamlessly with NumPy and Pandas.
+The main module:
+import matplotlib.pyplot as plt
+
+--- Slide 7 ---
+Basic Plot
+import matplotlib.pyplot as plt
+import numpy as np
+# Data
+x = np.array([1, 2, 3, 4, 5])
+y = x**2
+# Simple Line Plot
+plt.plot(x, y)
+plt.title("Basic Line Plot")
+plt.xlabel("X-axis")
+plt.ylabel("Y-axis")
+plt.show()
+
+--- Slide 8 ---
+Multiple Lines in One Plot
+x = np.linspace(0, 10, 100)
+plt.plot(x, np.sin(x), label="Sine", color="blue")
+plt.plot(x, np.cos(x), label="Cosine", color="red")
+plt.title("Sine and Cosine Waves")
+plt.xlabel("X values")
+plt.ylabel("Y values")
+plt.legend()
+plt.grid(True)
+plt.show()
+
+--- Slide 9 ---
+Markers and Line Styles
+x = [1,2,3,4,5]
+y = [2,4,6,8,10]
+plt.plot(x, y, 'o--g', label="Dashed Green Line with Circles")  
+# 'o' = marker, '--' = dashed line, 'g' = green
+
+plt.title("Markers & Styles Example")
+plt.legend()
+plt.show()
+
+--- Slide 10 ---
+Bar Chart
+subjects = ['Math', 'Science', 'English', 'History']
+marks = [90, 85, 78, 88]
+
+plt.bar(subjects, marks, color='orange')
+plt.title("Bar Chart Example")
+plt.xlabel("Subjects")
+plt.ylabel("Marks")
+plt.show()
+
+--- Slide 11 ---
+Horizontal Bar Chart
+plt.barh(subjects, marks, color='purple')
+plt.title("Horizontal Bar Chart")
+plt.show()
+
+--- Slide 12 ---
+Scatter Plot
+x = np.random.rand(50)   # random values
+y = np.random.rand(50)
+
+plt.scatter(x, y, color="red", marker="*")
+plt.title("Scatter Plot Example")
+plt.show()
+
+--- Slide 13 ---
+Histogram
+data = np.random.randn(1000)  # normally distributed data
+
+plt.hist(data, bins=30, color='skyblue', edgecolor='black')
+plt.title("Histogram Example")
+plt.xlabel("Values")
+plt.ylabel("Frequency")
+plt.show()
+
+--- Slide 14 ---
+Pie Chart
+sizes = [30, 20, 25, 25]
+labels = ['Apples', 'Bananas', 'Cherries', 'Dates']
+colors = ['red', 'yellow', 'pink', 'brown']
+
+plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%')
+plt.title("Pie Chart Example")
+plt.show()
+
+--- Slide 15 ---
+Subplots (Multiple Graphs)
+x = np.linspace(0, 10, 100)
+plt.subplot(2,2,1)   # 2 rows, 2 cols, position 1
+plt.plot(x, np.sin(x))
+plt.title("Sine")
+
+plt.subplot(2,2,2)
+plt.plot(x, np.cos(x))
+plt.title("Cosine")
+
+plt.subplot(2,2,3)
+plt.plot(x, np.tan(x))
+plt.title("Tangent")
+
+plt.subplot(2,2,4)
+plt.plot(x, np.exp(-x))
+plt.title("Exponential Decay")
+
+plt.tight_layout()
+plt.show()
+
+--- Slide 16 ---
+Customizing Plots
+x = np.linspace(0, 5, 100)
+y = x**2
+
+plt.plot(x, y, color="blue", linewidth=2, linestyle="--", marker="o", markersize=6)
+
+plt.title("Customized Plot", fontsize=15, color="red")
+plt.xlabel("X axis", fontsize=12)
+plt.ylabel("Y axis", fontsize=12)
+plt.grid(True, linestyle=":")
+plt.show()
+
+--- Slide 17 ---
+Integration with Pandas
+import pandas as pd
+
+data = {
+    "Year": [2018, 2019, 2020, 2021, 2022],
+    "Sales": [250, 300, 400, 350, 500]
+}
+
+df = pd.DataFrame(data)
+
+plt.plot(df["Year"], df["Sales"], marker="o")
+plt.title("Company Sales Over Years")
+plt.xlabel("Year")
+plt.ylabel("Sales")
+plt.show()
+
+--- Slide 18 ---
+Seaborn
+It is built on top of Matplotlib, but provides a higher-level API with attractive default styles and built-in dataset support.
+Seaborn = Statistical data visualization library in Python.
+Built on Matplotlib and integrated with Pandas.
+Provides beautiful plots with minimal code.
+Import-------import seaborn as sns
+import matplotlib.pyplot as plt
+Seaborn comes with built-in datasets (like tips, iris, penguins).
+
+--- Slide 19 ---
+Basic Example
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Load example dataset
+tips = sns.load_dataset("tips")
+
+# Scatter plot
+sns.scatterplot(x="total_bill", y="tip", data=tips)
+plt.title("Scatter Plot of Tips Dataset")
+plt.show()
+
+--- Slide 20 ---
+Distribution Plot
+Histogram + KDE (Kernel Density Estimation)
+sns.histplot(tips["total_bill"], bins=20, kde=True, color="skyblue")
+plt.title("Distribution of Total Bill")
+plt.show()
+
+--- Slide 21 ---
+Box Plot (for Outliers)
+sns.boxplot(x="day", y="total_bill", data=tips, palette="Set2")
+plt.title("Boxplot: Total Bill by Day")
+plt.show()
+
+--- Slide 22 ---
+Violin Plot (Shape of Distribution)
+sns.violinplot(x="day", y="total_bill", data=tips, palette="muted")
+plt.title("Violin Plot Example")
+plt.show()
+
+--- Slide 23 ---
+Bar Plot (Categorical Data)
+sns.barplot(x="day", y="total_bill", data=tips, estimator=sum, ci=None, color="orange")
+plt.title("Total Bill by Day (Sum)")
+plt.show()
+
+--- Slide 24 ---
+Count Plot (Counts Categories)
+sns.countplot(x="day", data=tips, palette="coolwarm")
+plt.title("Count of Customers by Day")
+plt.show()
+
+--- Slide 25 ---
+Pair Plot (Multi-variable Relationships)
+sns.pairplot(tips, hue="sex")
+plt.suptitle("Pair Plot Example", y=1.02)
+plt.show()
+
+--- Slide 26 ---
+Heatmap (Correlation Matrix)
+corr = tips.corr(numeric_only=True)
+sns.heatmap(corr, annot=True, cmap="coolwarm", linewidths=0.5)
+plt.title("Correlation Heatmap")
+plt.show()
+
+--- Slide 27 ---
+Regression Plot (Trend Line)
+sns.regplot(x="total_bill", y="tip", data=tips, color="green")
+plt.title("Regression Line Example")
+plt.show()
+
+--- Slide 28 ---
+Style Customization
+sns.set_style("darkgrid")   # styles: darkgrid, whitegrid, dark, white, ticks
+sns.set_palette("pastel")
+
+sns.scatterplot(x="total_bill", y="tip", data=tips, hue="day", style="time")
+plt.title("Customized Seaborn Plot")
+plt.show()
+
+--- Slide 29 ---
+Seaborn with Pandas DataFrame
+import pandas as pd
+
+data = {
+    "Year": [2018, 2019, 2020, 2021, 2022],
+    "Sales": [250, 300, 400, 350, 500],
+    "Profit": [50, 70, 90, 80, 120]
+}
+
+df = pd.DataFrame(data)
+
+sns.lineplot(x="Year", y="Sales", data=df, marker="o", label="Sales")
+sns.lineplot(x="Year", y="Profit", data=df, marker="s", label="Profit")
+
+plt.title("Sales & Profit over Years")
+plt.legend()
+plt.show()
+
+--- Slide 30 ---
+Summary
+Seaborn makes plots easier & prettier compared to Matplotlib.
+Important plots:
+scatterplot, histplot, boxplot, violinplot, barplot, countplot
+pairplot, heatmap, regplot, lineplot
+Integrated with Pandas DataFrames.
+
+
+
+==================================================
+FILE: 4_EDA_Pandas_Seaborn_Matplotlib.pptx
+==================================================
+
+--- Slide 1 ---
+Exploratory Data Analysis (EDA)Using Pandas, Seaborn & Matplotlib
+
+--- Slide 2 ---
+Introduction to EDA
+• Exploratory Data Analysis (EDA) helps in understanding datasets
+• Tools used: Pandas, Seaborn, Matplotlib
+• Steps: Summary statistics, Visualization, Feature relationships
+
+--- Slide 3 ---
+Step 1: Load Dataset
+• Use Pandas to load CSV or Seaborn built-in datasets
+• Example:
+  df = sns.load_dataset('titanic')
+• Inspect with df.head()
+
+--- Slide 4 ---
+Step 2: Summary Statistics
+• df.shape – dataset dimensions
+• df.info() – datatypes & missing values
+• df.describe() – statistical summary
+• df.isnull().sum() – missing values count
+
+--- Slide 5 ---
+Step 3: Univariate Analysis
+• Study single feature distribution
+• Numerical: Histograms, KDE plots
+• Categorical: Count plots
+• Example: sns.histplot(df['age'])
+
+--- Slide 6 ---
+Step 4: Bivariate Analysis
+• Explore relationship between two features
+• Scatter plots: sns.scatterplot(x, y)
+• Box plots: sns.boxplot(x, y)
+• Groupby with Pandas: df.groupby('class')['fare'].mean()
+
+--- Slide 7 ---
+Step 5: Correlation Analysis
+• Correlation matrix using df.corr()
+• Visualize with Heatmap:
+  sns.heatmap(corr, annot=True)
+• Helps identify feature relationships
+
+--- Slide 8 ---
+Step 6: Pairwise Relationships
+• Use sns.pairplot() for small datasets
+• Visualizes multiple feature relationships
+• Example: sns.pairplot(iris, hue='species')
+
+--- Slide 9 ---
+Step 7: Handling Missing Values & Outliers
+• Missing values:
+  - df.dropna()
+  - df.fillna(mean/median)
+• Outliers:
+  - Detect using boxplots
+  - Handle with capping or removal
+
+--- Slide 10 ---
+EDA Summary Roadmap
+1. Load & Inspect Data
+2. Univariate Analysis
+3. Bivariate Analysis
+4. Correlation Analysis
+5. Pairwise Relationships
+6. Handle Missing Values & Outliers
+✅ Prepares data for Machine Learning
+
+
+
+==================================================
+FILE: Day 3.pptx
+==================================================
+
+--- Slide 1 ---
+OPEN-SOURCE ONLINE TOOLS (READY TO USE)
+
+--- Slide 2 ---
+Below are popular, free, open-source tools you can deploy online for a Sales & Profit Analyzer.
+
+1.Metabase (Highly Recommended)
+Type: Open-source BI & analyticsBest for: Sales & profit dashboardsAI support: Via SQL + ML integration
+Features:
+Upload CSV / connect database
+Profit & sales dashboards
+Filters (date, product, region)
+Easy charts & reports
+ Tech:
+PostgreSQL / MySQL / CSV
+Docker supported
+Use case:
+“Small shop owner views monthly sales & profit trends online”
+
+--- Slide 3 ---
+2. Apache Superset
+Type: Advanced open-source analytics platformBest for: Large datasets & AI-ready dashboards
+ Features:
+Interactive dashboards
+SQL Lab for analytics
+ML integration (Python backend)
+Role-based access
+Ideal for:
+AI-powered forecasting
+Multi-branch business analysis
+
+--- Slide 4 ---
+3. ERPNext (All-in-One Open Source ERP)
+Type: Business management systemBest for: Real business deployment
+Features:
+Sales, inventory, accounting
+Profit & loss statements
+Customer & product analytics
+REST APIs for AI integration
+AI Add-on:
+Export data → apply ML models
+Plug AI insights back into ERP
+
+--- Slide 5 ---
+4. Streamlit (AI Dashboard Builder)
+Type: Python open-source frameworkBest for: AI-based analytics tools
+Features:
+Upload sales CSV
+Auto profit calculation
+ML forecasting (LSTM / Prophet)
+Runs online (Streamlit Cloud)
+Example use:
+AI-powered sales & profit analyzer in one Python app
+
+--- Slide 6 ---
+5. Odoo Community Edition
+Type: Open-source business suiteBest for: Sales + accounting analytics
+Features:
+Sales & invoice tracking
+Profit analysis
+Open APIs
+AI-ready architecture
+
+--- Slide 7 ---
+AI STACK (Open Source)
+	Purpose				Tool
+	Data processing	Pandas, NumPy
+	ML models		Scikit-learn
+	Forecasting		Prophet, LSTM
+	Visualization		Plotly
+	Backend			FastAPI
+	Auth			JWT
+
+--- Slide 8 ---
+RECOMMENDED COMBINATION (BEST PRACTICE)
+Academic / Mini Project
+Streamlit + Pandas + Scikit-learn 
+Small Business (Real Use)
+ERPNext + Metabase + AI API 
+Advanced AI System
+FastAPI + Superset + ML Models
+
+--- Slide 9 ---
+How to create csv file
+Creating a CSV (Comma-Separated Values) file is simple. Here are the most common and practical ways, from beginner-friendly to programmatic.
+METHOD 1: Using Microsoft Excel (Easiest)
+Open Microsoft Excel
+Enter data in rows and columns
+
+--- Slide 10 ---
+Example:
+		Date		Product	Sales		Cost
+	2024-01-01	Soap		5000		3200
+	2024-01-02	Shampoo	7000		4500
+Click File → Save As
+Choose location
+Select Save as type: CSV (Comma delimited) (*.csv)
+Click Save
+Click Yes if Excel shows a warning
+File saved as: sales.csv
+
+--- Slide 11 ---
+METHOD 2: Using Google Sheets (Online & Free)
+Open Google Sheets
+Enter your data
+Click File → Download
+Select Comma Separated Values (.csv)
+✔ Works fully online
+
+--- Slide 12 ---
+METHOD 3: Using Notepad (Manual)
+Open Notepad
+Type data with commas:
+	Date,Product,Sales,Cost 
+	2024-01-01,Soap,5000,3200 
+	2024-01-02,Shampoo,7000,4500 
+	2024-01-03,Soap,6200,3500
+Click File → Save As
+File name: sales.csv
+Save as type: All Files
+Encoding: UTF-8
+Click Save
+
+--- Slide 13 ---
+METHOD 4: Using Python (Recommended for AI Projects)
+import pandas as pd
+
+data = {
+    "date": ["2024-01-01", "2024-01-02", "2024-01-03"],
+    "product": ["Soap", "Shampoo", "Soap"],
+    "sales": [5000, 7000, 6200],
+    "cost": [3200, 4500, 3500]
+}
+
+df = pd.DataFrame(data)
+df.to_csv("sales.csv", index=False)
+
+print("CSV file created successfully")
+
+Output file: sales.csv
+
+--- Slide 14 ---
+METHOD 5: Using Online CSV Generator Tools
+Free tools:
+TableConvert
+CSVJSON
+ConvertCSV
+✔ No installation needed✔ Good for quick datasets
+
+
+
+==================================================
+FILE: GUI -Interface.pptx
+==================================================
+
+--- Slide 1 ---
+GUI interface in Python
+
+--- Slide 2 ---
+Graphical User Interfaces (GUIs) in Python allow users to interact with applications through visual elements like buttons, menus, windows, and text boxes, rather than solely through command-line interfaces.
+Popular Python GUI Frameworks: 
+Tkinter: 
+Python's standard and built-in GUI library. 
+Provides a lightweight wrapper around the Tcl/Tk toolkit. 
+Cross-platform, ensuring applications function similarly across Windows, macOS, and Linux. 
+Suitable for developing simple to moderately complex desktop applications and learning GUI programming basics.
+
+--- Slide 3 ---
+PyQt: 
+A set of Python bindings for the Qt application framework. 
+Offers a comprehensive suite of widgets and features for building sophisticated, high-performance applications. 
+Supports cross-platform development, including desktop and mobile environments.
+wxPython: 
+A wrapper for the wxWidgets C++ library. 
+Provides a native look and feel across different operating systems. 
+Known for its extensive set of widgets and robust features for desktop application development.
+
+--- Slide 4 ---
+Kivy: 
+Designed for creating modern and responsive user interfaces, particularly for multi-touch applications and mobile devices. 
+Employs a declarative language (KV language) for UI design, enhancing development speed.
+
+--- Slide 5 ---
+Key Concepts in Python GUI Development: 
+Widgets: 
+The fundamental building blocks of a GUI, such as buttons, labels, entry fields, and scrollbars. 
+Layout Management: 
+Techniques for arranging widgets within a window, including packing, placing, and gridding. 
+Event Handling: 
+Mechanisms for responding to user interactions, such as button clicks, key presses, or mouse movements, by binding them to specific functions.
+
+--- Slide 6 ---
+Tkinter
+
+--- Slide 7 ---
+What is Tkinter?
+
+Tkinter is the standard GUI (Graphical User Interface) library that comes built-in with Python.
+It lets you build desktop apps with windows, buttons, labels, input boxes, and more.
+ 	*Comes pre-installed with Python (no extra downloads in most cases)
+	*Used to create windows, forms, dialogs, and interactive interfaces
+	*Beginner-friendly and great for quick prototypes.
+
+--- Slide 8 ---
+What Can You Build With Tkinter?
+
+You can build:
+	*  Login/registration forms
+	*  Chatbots and messengers
+	*  Calculators and converters
+	*  File explorers and text editors
+	*  Dashboard UIs
+
+--- Slide 9 ---
+Basic Tkinter Concepts
+Here are some **key components** you'll use in Tkinter:
+
+--- Slide 10 ---
+Minimal Tkinter Example
+Python
+
+import tkinter as tk
+ 
+root = tk.Tk()
+root.title("My First App")
+root.geometry("300x200")
+ 
+label = tk.Label(root, text="Hello, Tkinter!")
+label.pack(pady=20)
+ 
+entry = tk.Entry(root)
+entry.pack()
+ 
+def on_click():
+    name = entry.get()
+    label.config(text=f"Hi, {name}!")
+ 
+button = tk.Button(root, text="Say Hello", command=on_click)
+button.pack(pady=10)
+ 
+root.mainloop()
+
+--- Slide 11 ---
+Step 1 — Import Tkinter and Create a Window
+import tkinter as tk
+from tkinter import messagebox
+# Create main window
+window = tk.Tk()
+window.title("Login Page")
+window.geometry("300x200")
+
+--- Slide 12 ---
+Step 2 — Add Labels and Entry Fields
+# Username label and text entry box
+tk.Label(window, text="Username").pack(pady=5)
+username_entry = tk.Entry(window)
+username_entry.pack()
+# Password label and text entry box
+tk.Label(window, text="Password").pack(pady=5)
+password_entry = tk.Entry(window, show="*")  
+# show * instead of real password
+password_entry.pack()
+
+--- Slide 13 ---
+Step 3 — Add Login Button and Logic
+def login():    
+username = username_entry.get()    
+password = password_entry.get()    
+# Example: hardcoded credentials   
+if username == "admin" and password == "1234":        messagebox.showinfo("Login", "Login Successful!")    else:        
+messagebox.showerror("Login", "Invalid username or password")
+login_button = tk.Button(window, text="Login", command=login)
+login_button.pack(pady=10)
+
+--- Slide 14 ---
+Step 4 — Run the App
+window.mainloop()
+
+Full Code Example
+import tkinter as tk
+from tkinter import messagebox
+
+# Create window
+window = tk.Tk()window.title("Login Page")
+window.geometry("300x200")
+
+--- Slide 15 ---
+# Username label and text entry
+tk.Label(window, text="Username").pack(pady=5)
+username_entry = tk.Entry(window)
+username_entry.pack()
+
+# Password label and text entry
+tk.Label(window, text="Password").pack(pady=5)
+password_entry = tk.Entry(window, show="*")
+password_entry.pack()
+
+# Login button
+def login():    
+username = username_entry.get()    
+password = password_entry.get()    
+if username == "admin" and password == "1234":      
+  messagebox.showinfo("Login", "Login Successful!")   
+ else:      
+  messagebox.showerror("Login", "Invalid username or password")
+tk.Button(window, text="Login", command=login).pack(pady=10)
+window.mainloop()
+
+--- Slide 16 ---
+Optional — Add “Clear” and “Exit” Buttons
+def clear():    
+username_entry.delete(0, tk.END)    password_entry.delete(0, tk.END)
+def close():    window.destroy()
+tk.Button(window, text="Clear", command=clear).pack()
+tk.Button(window, text="Exit", command=close).pack()
+
+--- Slide 17 ---
+Step 5 (Optional) — Store Users in Database (SQLite)
+If you want a real login system instead of hardcoded credentials, you can:
+Create a users.db file using sqlite3.
+Save username/passwords (hashed) in it.
+Validate during login.
+
+
+
+==================================================
+FILE: Milestone - 2.pptx
+==================================================
+
+--- Slide 1 ---
+Milestone - 2
+
+--- Slide 2 ---
+Milestone - 2
+Implement personalized email generation. 
+Develop lead scoring and qualification engine. 
+Generate outreach recommendations and engagement strategies.
+
+--- Slide 3 ---
+3.AI Outreach Generation 
+Generate personalized cold emails and sales messages. 
+Create outreach content based on prospect profiles. 
+Customize communication strategies for different industries. 
+4. Lead Scoring & Recommendation Engine 
+Predict conversion likelihood using AI models. 
+Assign lead scores based on engagement and company characteristics. 
+Generate next-best-action recommendations.
+
+--- Slide 4 ---
+Module 3: AI Outreach Generation (Sales GenieAI)
+Sales GenieAI acts as an AI-powered sales assistant that helps sales teams:
+Generate personalized cold emails. 
+Create follow-up messages. 
+Recommend communication strategies. 
+Improve customer engagement. 
+Increase response rates.
+
+--- Slide 5 ---
+Workflow
+Prospect Database
+       │
+       ▼
+Collect Customer Information
+       │
+       ▼
+Analyze Company & Industry
+       │
+       ▼
+Generate Personalized Email
+       │
+       ▼
+Sales Representative Review
+       │
+       ▼
+Send Email
+       │
+       ▼
+Track Response
+
+--- Slide 6 ---
+Python Implementation Step 1: Prospect Dataset
+prospect = {
+    "name": "John Smith",
+    "company": "TechNova Solutions",
+    "industry": "Software",
+    "designation": "Sales Manager",
+    "pain_point": "Low Lead Conversion"
+}
+
+--- Slide 7 ---
+Step 2: AI Email Generator
+def generate_email(prospect):
+
+    email = f"""
+Subject: Helping {prospect['company']} Improve Sales Performance
+
+Hi {prospect['name']},
+
+I noticed that {prospect['company']} is growing rapidly in the {prospect['industry']} industry.
+
+Many companies face challenges like {prospect['pain_point']}.
+
+Our AI Sales Intelligence Platform helps businesses identify high-quality leads, automate outreach, and increase conversions.
+
+Would you be available for a quick 15-minute demo next week?
+
+Regards,
+Sales GenieAI
+""“
+   return email
+print(generate_email(prospect))
+
+--- Slide 8 ---
+Output
+Subject: Helping TechNova Solutions Improve Sales Performance
+
+Hi John Smith,
+
+I noticed that TechNova Solutions is growing rapidly in the Software industry.
+
+Many companies face challenges like Low Lead Conversion.
+
+Our AI Sales Intelligence Platform helps businesses identify high-quality leads, automate outreach, and increase conversions.
+
+Would you be available for a quick 15-minute demo next week?
+
+Regards,
+Sales GenieAI
+
+--- Slide 9 ---
+Industry-Based Communication Strategy
+industry_messages = {
+
+    "Healthcare":
+    "Improve patient engagement using AI-powered healthcare analytics.",
+
+    "Finance":
+    "Boost customer acquisition through intelligent financial lead scoring.",
+
+    "Education":
+    "Increase student enrollment using AI-based outreach campaigns.",
+
+    "Retail":
+    "Improve customer retention using personalized marketing.",
+
+    "Software":
+    "Accelerate B2B sales using AI-powered lead intelligence."
+}
+
+industry = "Software"
+
+print(industry_messages[industry])
+
+--- Slide 10 ---
+Output
+	Accelerate B2B sales using AI-powered lead intelligence.
+
+--- Slide 11 ---
+AI Follow-up Message Generator
+def follow_up(name):
+
+    return f"""
+Hello {name},
+
+Just following up regarding my previous email.
+
+I'd be happy to show how our AI Sales Intelligence Platform can improve your sales pipeline.
+
+Please let me know a convenient time.
+
+Regards,
+Sales GenieAI
+"""
+
+print(follow_up("John"))
+
+--- Slide 12 ---
+Module Architecture
+CRM Database
+      │
+      ▼
+Prospect Information
+      │
+      ▼
+Sales GenieAI
+      │
+ ┌────┼────┐
+ │    │    │
+ ▼    ▼    ▼
+Cold Email
+LinkedIn Message
+Follow-up Email
+      │
+      ▼
+Customer
+
+--- Slide 13 ---
+Advantages
+Personalized communication 
+Saves manual effort 
+Improves email response rate 
+Consistent sales messaging 
+Supports multiple industries 
+AI-powered content generation
+
+--- Slide 14 ---
+Module 4: Lead Scoring & Recommendation Engine (Sales GenieAI)
+Lead Scoring Factors
+	Feature			Description	
+	Email Opens		Number of emails opened Website Visits          Visits to company website Demo Request         Whether a demo was requested 
+	Company Size 		Small, Medium, Enterprise Industry			Business domain
+ 	Previous Purchases	Existing customer history
+
+--- Slide 15 ---
+Workflow
+Lead Data
+     │
+     ▼
+Feature Extraction
+     │
+     ▼
+Machine Learning Model
+     │
+     ▼
+Lead Score Prediction
+     │
+     ▼
+Recommendation Engine
+     │
+     ▼
+Sales Representative
+
+--- Slide 16 ---
+Sample Dataset
+import pandas as pd
+
+data = {
+    "Email_Open":[10,4,8,2,15],
+    "Website_Visit":[15,5,10,3,20],
+    "Demo_Request":[1,0,1,0,1],
+    "Converted":[1,0,1,0,1]
+}
+
+df = pd.DataFrame(data)
+
+print(df)
+
+--- Slide 17 ---
+Machine Learning Model
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+
+X = df[["Email_Open","Website_Visit","Demo_Request"]]
+y = df["Converted"]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
+)
+
+model = RandomForestClassifier()
+
+model.fit(X_train, y_train)
+
+--- Slide 18 ---
+Predict New Lead
+new_lead = [[12,18,1]]
+
+prediction = model.predict(new_lead)
+
+print(prediction)
+Output
+[1]
+1 = High Probability of Conversion
+
+--- Slide 19 ---
+Lead Score Calculation
+probability = model.predict_proba(new_lead)
+
+score = probability[0][1] * 100
+
+print("Lead Score:", round(score,2))
+Output
+Lead Score: 96.45
+
+--- Slide 20 ---
+Recommendation Engine
+score = 96
+
+if score >= 90:
+    action = "Schedule Product Demo Immediately"
+
+elif score >= 70:
+    action = "Send Personalized Proposal"
+
+elif score >= 50:
+    action = "Send Follow-up Email"
+
+else:
+    action = "Nurture Lead with Marketing Campaign"
+
+print(action)
+
+Output
+
+Schedule Product Demo Immediately
+
+--- Slide 21 ---
+Complete Lead Evaluation Function
+def evaluate_lead(score):
+
+    if score >= 90:
+        return "Hot Lead - Schedule Demo"
+
+    elif score >= 70:
+        return "Qualified Lead - Send Proposal"
+
+    elif score >= 50:
+        return "Warm Lead - Follow Up"
+
+    else:
+        return "Cold Lead - Marketing Campaign"
+
+lead_score = 84
+
+print("Lead Score:", lead_score)
+print("Recommendation:", evaluate_lead(lead_score))
+
+Output
+Lead Score: 84 Recommendation: Qualified Lead - Send Proposal
+
+--- Slide 22 ---
+Recommendation Flow
+Lead Information
+        │
+        ▼
+Sales GenieAI
+        │
+        ▼
+Machine Learning Model
+        │
+        ▼
+Lead Score (0–100)
+        │
+ ┌──────┼──────────┐
+ │      │          │
+ ▼      ▼          ▼
+90–100  70–89     50–69
+Hot     Qualified Warm
+ │        │         │
+ ▼        ▼         ▼
+Demo   Proposal  Follow-up
+        │
+        ▼
+Sales Success
+
+--- Slide 23 ---
+Technologies Used
+Programming Language: Python 
+Data Handling: Pandas 
+Machine Learning: Scikit-learn (Random Forest Classifier) 
+AI Component: Sales GenieAI for personalized outreach and recommendations 
+Database: MySQL or SQLite (for storing prospect and lead information) 
+Frontend (optional): Tkinter, Flask, or Streamlit 
+Summary
+
+--- Slide 24 ---
+
+--- Slide 25 ---
+1. AI Email Generator
+Purpose
+The AI Email Generator automatically creates personalized sales emails based on prospect information stored in the CRM.
+Inputs
+Prospect Name 
+Company Name 
+Industry 
+Job Title 
+Recent Company News 
+Pain Points 
+Previous Interactions
+
+--- Slide 26 ---
+Example
+Prospect Information
+prospect = {
+    "name": "Sarah Johnson",
+    "company": "TechCorp",
+    "industry": "Technology",
+    "event": "Series C Funding",
+    "pain_point": "Managing large data pipelines"
+}
+
+--- Slide 27 ---
+AI Email Generation
+def generate_email(prospect):
+
+    email = f"""
+Subject: Transform Your Data Pipeline with AI
+
+Hi {prospect['name']},
+
+I noticed that {prospect['company']} recently secured
+{prospect['event']}.
+
+As your organization grows, efficiently managing
+{prospect['pain_point']} becomes increasingly important.
+
+Our AI-powered platform helps organizations reduce
+processing time by 65% and improve operational efficiency.
+
+Would you be available for a short discussion next week?
+
+Regards,
+Sales GenieAI
+"""
+
+    return email
+
+print(generate_email(prospect))
+
+--- Slide 28 ---
+Output
+Subject: Transform Your Data Pipeline with AI
+
+Hi Sarah Johnson,
+
+I noticed that TechCorp recently secured Series C Funding.
+
+As your organization grows, efficiently managing large
+data pipelines becomes increasingly important.
+
+Our AI-powered platform helps organizations reduce
+processing time by 65%.
+
+Regards,
+Sales GenieAI
+
+--- Slide 29 ---
+2. Lead Scoring Engine
+Purpose
+Lead Scoring predicts the probability that a prospect will become a customer.
+Lead Scoring Factors
+	Factor				Weight
+	Company Growth		25
+	Industry Match			22
+	Website Visits			18
+	Email Opens			15
+	Demo Request			20
+
+--- Slide 30 ---
+Lead Score Formula
+def calculate_score(company_growth,
+                    industry_match,
+                    website_visits,
+                    email_opens,
+                    demo_request):
+
+    score = (
+        company_growth +
+        industry_match +
+        website_visits +
+        email_opens +
+        demo_request
+    )
+
+    return score
+
+lead_score = calculate_score(
+    25,
+    22,
+    18,
+    15,
+    12
+)
+
+print("Lead Score:", lead_score)
+
+Output
+Lead Score: 92
+
+--- Slide 31 ---
+3. Machine Learning Lead Prediction
+Training Dataset
+import pandas as pd
+
+data = {
+    "Email_Open":[12,5,15,2,8],
+    "Website_Visit":[20,6,18,3,10],
+    "Demo_Request":[1,0,1,0,1],
+    "Converted":[1,0,1,0,1]
+}
+
+df = pd.DataFrame(data)
+
+--- Slide 32 ---
+Random Forest Model
+from sklearn.ensemble import RandomForestClassifier
+
+X = df[["Email_Open",
+        "Website_Visit",
+        "Demo_Request"]]
+
+y = df["Converted"]
+
+model = RandomForestClassifier()
+
+model.fit(X, y)
+
+--- Slide 33 ---
+Predict Conversion Probability
+new_lead = [[14,18,1]]
+
+prediction = model.predict(new_lead)
+
+probability = model.predict_proba(new_lead)
+
+print("Prediction:", prediction[0])
+print("Conversion Probability:",
+      round(probability[0][1]*100,2), "%")
+
+--- Slide 34 ---
+output
+Prediction: 1 Conversion Probability: 78.45 %
+The dashboard displays:
+Conversion Probability = 78%
+
+--- Slide 35 ---
+4. Outreach Strategy Recommendation Engine
+Purpose
+Sales GenieAI recommends the best communication strategy based on lead behavior.
+Follow-Up Timing Recommendation
+def followup_strategy(score):
+
+    if score >= 90:
+        return "Follow up within 48 hours"
+
+    elif score >= 70:
+        return "Follow up within 3 days"
+
+    else:
+        return "Weekly nurturing campaign"
+
+print(followup_strategy(92))
+
+--- Slide 36 ---
+Output
+Follow up within 48 hours
+
+--- Slide 37 ---
+Channel Mix Recommendation
+def channel_mix(score):
+
+    if score >= 90:
+        return [
+            "Email",
+            "LinkedIn",
+            "Product Demo"
+        ]
+
+    elif score >= 70:
+        return [
+            "Email",
+            "LinkedIn"
+        ]
+
+    else:
+        return [
+            "Email Campaign"
+        ]
+
+print(channel_mix(92))
+
+--- Slide 38 ---
+Output
+['Email', 'LinkedIn', 'Product Demo']
+
+--- Slide 39 ---
+5. Content Strategy Recommendation
+AI Recommendation Logic
+def content_strategy(industry):
+
+    recommendations = {
+
+        "Technology":
+        "Share cloud migration case studies.",
+
+        "Finance":
+        "Highlight ROI and compliance benefits.",
+
+        "Healthcare":
+        "Focus on patient experience improvement.",
+
+        "Retail":
+        "Show customer retention success stories."
+    }
+
+    return recommendations.get(
+        industry,
+        "Share relevant case studies."
+    )
+
+print(content_strategy("Technology"))
+
+--- Slide 40 ---
+Output
+Share cloud migration case studies.
+
+--- Slide 41 ---
+Complete Sales GenieAI Workflow
+Prospect Database
+        │
+        ▼
+Data Collection
+        │
+        ▼
+AI Prospect Analysis
+        │
+ ┌──────┼─────────┐
+ │      │         │
+ ▼      ▼         ▼
+Email  Lead    Strategy
+Gen.   Score   Engine
+ │      │         │
+ ▼      ▼         ▼
+Personalized  Conversion
+Outreach      Prediction
+        │
+        ▼
+Next Best Action
+        │
+        ▼
+Sales Representative
+
+--- Slide 42 ---
+Technologies Used in Sales GenieAI
+		Component		Technology	
+		Backend			Python
+		Machine Learning	Scikit-learn
+		Data Processing		Pandas	
+		Database			MySQL / PostgreSQL	API Layer			Flask / FastAPI	Frontend			Streamlit / React		AI Content Generation	OpenAI GPT Models	Lead Prediction		Random Forest, 						XGBoost	
+		CRM Integration		Salesforce, HubSpot
+
+
+
+==================================================
+FILE: Module 1 - Coding.pptx
+==================================================
+
+--- Slide 1 ---
+SalesGenie AI – AI Sales Assistant & Lead Intelligence Platform
+
+--- Slide 2 ---
+The platform gathers information from websites, CRM systems, emails, social media, and customer interactions to generate actionable insights. 
+It can automatically score leads, recommend the best prospects, personalize email responses, schedule follow-ups, predict customer buying behavior, and provide real-time sales recommendations.
+
+--- Slide 3 ---
+Key Features
+Lead Identification
+Lead Scoring
+Customer Profiling
+Email & Chat Automation
+Sales Forecasting
+Meeting Scheduling
+CRM Integration
+Real-Time Analytics
+
+--- Slide 4 ---
+Real-Time Example
+Scenario
+A software company sells cloud-based accounting software to small businesses.
+Step 1: Lead Discovery
+The AI platform scans business directories, LinkedIn, company websites, and online forms to identify businesses that may need accounting software.
+Example Lead
+Company: ABC Traders 
+Industry: Retail 
+Employees: 60 
+Location: Chennai 
+Annual Revenue: ₹15 Crore
+
+--- Slide 5 ---
+Step 2: Lead Intelligence
+The AI analyzes available information and generates insights:
+Parameter			Result
+Company Size		Medium
+Technology Used		Excel-based accounting
+Hiring Activity		Hiring accountants
+Website Visits		6 visits in last week
+Email Opens			5 out of 6 emails opened
+
+--- Slide 6 ---
+Step 3: AI Lead Score
+The platform calculates the probability of conversion.
+Factor						Score
+Company Fit					25/25
+Engagement						30/30
+Budget						20/20
+Decision Maker Interaction			20/20
+Buying Intent					5/5
+
+Final Lead Score = 100/100 (Hot Lead)
+
+--- Slide 7 ---
+Step 4: AI Recommendation
+The AI assistant suggests:
+Contact the Finance Manager today. 
+Offer a free 14-day product trial. 
+Highlight GST compliance and automated invoice generation. 
+Schedule a live demo within 24 hours.
+
+--- Slide 8 ---
+Step 5: Automated Personalized Email
+Subject: Simplify Your Accounting with AI-Powered Software
+Dear Mr. Kumar,
+I noticed that your company is expanding and may benefit from a modern accounting solution. Our AI-powered platform helps businesses automate GST filing, invoice generation, and financial reporting.
+Would you be available for a 20-minute product demonstration this week?
+
+Best Regards,
+Sales Team
+
+--- Slide 9 ---
+Step 6: Sales Outcome
+
+Before AI						After AI
+Manual lead search		AI automatically identifies leads
+Generic emails			Personalized emails
+Equal attention to all leads	Priority given to high-value leads
+Low conversion rate		Higher conversion rate
+Time-consuming follow-ups	Automated reminders and follow-ups
+
+--- Slide 10 ---
+Benefits
+Increases sales productivity. 
+Improves lead conversion rates. 
+Reduces manual work for sales teams. 
+Provides data-driven decision-making. 
+Enhances customer engagement through personalized communication. 
+Predicts customer buying intent more accurately. 
+Saves time by automating repetitive sales tasks.
+
+--- Slide 11 ---
+Real-World Examples
+Many organizations use AI-powered sales and lead intelligence platforms, including:
+Salesforce Einstein AI 
+HubSpot AI 
+Zoho Zia 
+Microsoft Dynamics 365 Sales
+
+--- Slide 12 ---
+Lead Management & Prospect Database  - Module 1
+Create and manage prospect and customer records. 
+Store company profiles, contact details, and engagement history. 
+Track lead lifecycle and sales stages.
+
+--- Slide 13 ---
+Step 1: Lead Registration
+A new lead enters the system through various sources such as:
+Company website contact form 
+Social media advertisements 
+Email campaigns 
+LinkedIn 
+Trade shows or exhibitions 
+Sales representative manual entry 
+Example
+Field					Value
+Lead ID					L001
+Company Name				ABC Traders
+Contact Person				Rahul Kumar
+Email					rahul@abctraders.com
+Phone					+91-9876543210
+Industry					Retail
+Source					Website
+Output: A new lead record is created in the prospect database.
+
+--- Slide 14 ---
+Step 2: Company Profile Creation
+The AI platform stores detailed company information.
+Information Stored
+Company name 
+Industry 
+Business size 
+Annual revenue 
+Location 
+Number of employees 
+Website 
+Products/Services 
+Example
+Company				ABC Traders
+Industry				Retail
+Employees				60
+Revenue				15 Crore
+City				Chennai
+Website				www.abctraders.com
+Output: Complete company profile available for future analysis.
+
+--- Slide 15 ---
+Step 3: Contact Management
+The platform records all important contacts within the company.
+Example
+Name				Position			Email			Phone
+Rahul Kumar			Finance Manager	rahul@abctraders.com	+91-9876543210
+Priya Sharma			IT Manager		priya@abctraders.com	+91-9876543200
+
+Output: Multiple contacts can be linked to one company.
+
+--- Slide 16 ---
+Step 4: Engagement History
+Every customer interaction is automatically stored.
+Activities Recorded
+Phone calls 
+Emails sent 
+Emails opened 
+Website visits 
+Product demo requests 
+Meetings 
+Chatbot conversations 
+Example
+Date	Activity		Status
+10 June	Website Visit	Completed
+11 June	Email Sent		Delivered
+12 June	Email Opened	Yes
+13 June	Product Demo	Completed
+14 June	Follow-up Call	Pending
+
+Output: Complete interaction history is maintained.
+
+--- Slide 17 ---
+Step 5: AI Lead Analysis
+The AI engine analyzes customer behavior using collected data.
+AI Checks
+Number of website visits 
+Email open rate 
+Product pages viewed 
+Demo requests 
+Previous purchases 
+Industry match 
+Company size 
+Example
+Parameter			Result
+Website Visits			8
+Email Opens			6
+Demo Request			Yes
+Buying Intent			High
+Output: AI identifies highly interested prospects.
+
+--- Slide 18 ---
+Step 6: Lead Scoring
+The AI assigns a score based on the likelihood of conversion.
+Example Formula
+Lead Score =
+Company Fit = 30 
+Customer Engagement = 30 
+Budget = 20 
+Decision Maker Activity = 10 
+Buying Intent = 10 
+Total Score = 100
+Classification
+Score			Category
+81–100			Hot Lead
+61–80			Warm Lead
+41–60			Cold Lead
+0–40			Low Priority
+Output: Sales team focuses first on Hot Leads.
+
+--- Slide 19 ---
+Example
+Lead ID		Current Stage
+L001		Product Demo
+
+--- Slide 20 ---
+Step 7: Sales Stage Tracking
+Each lead moves through predefined sales stages.
+Sales Lifecycle
+
+--- Slide 21 ---
+
+--- Slide 22 ---
+Project Structure
+AI_Sales_Intelligence/
+│
+├── app.py
+├── database.py
+├── sales.db
+│
+├── templates/
+│      index.html
+│      add_lead.html
+│
+├── static/
+│      style.css
+│
+└── requirements.txt
+
+--- Slide 23 ---
+Step 1: Install Required Packages
+pip install flask
+
+--- Slide 24 ---
+Step 2: Create Database (database.py)
+import sqlite3
+conn = sqlite3.connect("sales.db")
+cursor = conn.cursor()
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS leads(
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+company TEXT,
+contact TEXT,
+designation TEXT,
+industry TEXT,
+employees TEXT,
+revenue TEXT,
+location TEXT,
+funding TEXT,
+technology TEXT,
+score INTEGER
+)
+""")
+conn.commit()
+conn.close()
+print("Database Created Successfully")
+
+--- Slide 25 ---
+Run:
+python database.py
+
+--- Slide 26 ---
+Step 3: Flask Backend (app.py)
+from flask import Flask, render_template, request, redirectimport sqlite3app = Flask(__name__)DATABASE = "sales.db"def get_db():conn = sqlite3.connect(DATABASE)conn.row_factory = sqlite3.Rowreturn conn
+
+--- Slide 27 ---
+@app.route("/")def home():conn = get_db()leads = conn.execute("SELECT * FROM leads").fetchall()selected = Noneif len(leads) > 0:selected = leads[0]conn.close()return render_template("index.html",leads=leads,selected=selected)
+
+--- Slide 28 ---
+@app.route("/add", methods=["GET", "POST"])def add():if request.method == "POST":conn = get_db()conn.execute("""INSERT INTO leads(company,contact,designation,industry,employees,revenue,location,funding,technology,score)VALUES(?,?,?,?,?,?,?,?,?,?)""",
+
+--- Slide 29 ---
+(request.form["company"],request.form["contact"],request.form["designation"],request.form["industry"],request.form["employees"],request.form["revenue"],request.form["location"],request.form["funding"],request.form["technology"],request.form["score"]))conn.commit()conn.close()return redirect("/")return render_template("add_lead.html")if __name__ == "__main__":app.run(debug=True)
+
+--- Slide 30 ---
+Step 4: Add Lead Page (templates/add_lead.html)
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>Add Lead</title>
+
+</head>
+
+<body>
+
+<h2>Add New Lead</h2>
+
+<form method="POST">
+
+Company
+
+<input type="text" name="company"><br><br>
+
+Contact Person
+
+<input type="text" name="contact"><br><br>
+
+--- Slide 31 ---
+Designation
+
+<input type="text" name="designation"><br><br>
+
+Industry
+
+<input type="text" name="industry"><br><br>
+
+Employees
+
+<input type="text" name="employees"><br><br>
+
+Revenue
+
+<input type="text" name="revenue"><br><br>
+
+Location
+
+<input type="text" name="location"><br><br>
+
+--- Slide 32 ---
+Funding
+
+<input type="text" name="funding"><br><br>
+
+Technology Stack
+
+<input type="text" name="technology"><br><br>
+
+Qualification Score
+
+<input type="number" name="score"><br><br>
+
+<input type="submit" value="Save">
+
+</form>
+
+</body>
+
+</html>
+
+--- Slide 33 ---
+Step 5: Dashboard (templates/index.html)
+
+
+
+==================================================
+FILE: Module 1 - Incomplete.pptx
+==================================================
+
+--- Slide 1 ---
+SalesGenie AI – AI Sales Assistant & Lead Intelligence Platform
+
+--- Slide 2 ---
+The platform gathers information from websites, CRM systems, emails, social media, and customer interactions to generate actionable insights. 
+It can automatically score leads, recommend the best prospects, personalize email responses, schedule follow-ups, predict customer buying behavior, and provide real-time sales recommendations.
+
+--- Slide 3 ---
+Key Features
+Lead Identification
+Lead Scoring
+Customer Profiling
+Email & Chat Automation
+Sales Forecasting
+Meeting Scheduling
+CRM Integration
+Real-Time Analytics
+
+--- Slide 4 ---
+Real-Time Example
+Scenario
+A software company sells cloud-based accounting software to small businesses.
+Step 1: Lead Discovery
+The AI platform scans business directories, LinkedIn, company websites, and online forms to identify businesses that may need accounting software.
+Example Lead
+Company: ABC Traders 
+Industry: Retail 
+Employees: 60 
+Location: Chennai 
+Annual Revenue: ₹15 Crore
+
+--- Slide 5 ---
+Step 2: Lead Intelligence
+The AI analyzes available information and generates insights:
+Parameter			Result
+Company Size		Medium
+Technology Used		Excel-based accounting
+Hiring Activity		Hiring accountants
+Website Visits		6 visits in last week
+Email Opens			5 out of 6 emails opened
+
+--- Slide 6 ---
+Step 3: AI Lead Score
+The platform calculates the probability of conversion.
+Factor						Score
+Company Fit					25/25
+Engagement						30/30
+Budget						20/20
+Decision Maker Interaction			20/20
+Buying Intent					5/5
+
+Final Lead Score = 100/100 (Hot Lead)
+
+--- Slide 7 ---
+Step 4: AI Recommendation
+The AI assistant suggests:
+Contact the Finance Manager today. 
+Offer a free 14-day product trial. 
+Highlight GST compliance and automated invoice generation. 
+Schedule a live demo within 24 hours.
+
+--- Slide 8 ---
+Step 5: Automated Personalized Email
+Subject: Simplify Your Accounting with AI-Powered Software
+Dear Mr. Kumar,
+I noticed that your company is expanding and may benefit from a modern accounting solution. Our AI-powered platform helps businesses automate GST filing, invoice generation, and financial reporting.
+Would you be available for a 20-minute product demonstration this week?
+
+Best Regards,
+Sales Team
+
+--- Slide 9 ---
+Step 6: Sales Outcome
+
+Before AI						After AI
+Manual lead search		AI automatically identifies leads
+Generic emails			Personalized emails
+Equal attention to all leads	Priority given to high-value leads
+Low conversion rate		Higher conversion rate
+Time-consuming follow-ups	Automated reminders and follow-ups
+
+--- Slide 10 ---
+Benefits
+Increases sales productivity. 
+Improves lead conversion rates. 
+Reduces manual work for sales teams. 
+Provides data-driven decision-making. 
+Enhances customer engagement through personalized communication. 
+Predicts customer buying intent more accurately. 
+Saves time by automating repetitive sales tasks.
+
+--- Slide 11 ---
+Real-World Examples
+Many organizations use AI-powered sales and lead intelligence platforms, including:
+Salesforce Einstein AI 
+HubSpot AI 
+Zoho Zia 
+Microsoft Dynamics 365 Sales
+
+--- Slide 12 ---
+Step 1: Lead Registration
+A new lead enters the system through various sources such as:
+Company website contact form 
+Social media advertisements 
+Email campaigns 
+LinkedIn 
+Trade shows or exhibitions 
+Sales representative manual entry 
+Example
+Field					Value
+Lead ID					L001
+Company Name				ABC Traders
+Contact Person				Rahul Kumar
+Email					rahul@abctraders.com
+Phone					+91-9876543210
+Industry					Retail
+Source					Website
+Output: A new lead record is created in the prospect database.
+
+--- Slide 13 ---
+Lead Management & Prospect Database  - Module 1
+Create and manage prospect and customer records. 
+Store company profiles, contact details, and engagement history. 
+Track lead lifecycle and sales stages.
+
+--- Slide 14 ---
+Step 2: Company Profile Creation
+The AI platform stores detailed company information.
+Information Stored
+Company name 
+Industry 
+Business size 
+Annual revenue 
+Location 
+Number of employees 
+Website 
+Products/Services 
+Example
+Company				ABC Traders
+Industry				Retail
+Employees				60
+Revenue				15 Crore
+City				Chennai
+Website				www.abctraders.com
+Output: Complete company profile available for future analysis.
+
+--- Slide 15 ---
+Step 3: Contact Management
+The platform records all important contacts within the company.
+Example
+Name				Position			Email			Phone
+Rahul Kumar			Finance Manager	rahul@abctraders.com	+91-9876543210
+Priya Sharma			IT Manager		priya@abctraders.com	+91-9876543200
+
+Output: Multiple contacts can be linked to one company.
+
+--- Slide 16 ---
+Step 4: Engagement History
+Every customer interaction is automatically stored.
+Activities Recorded
+Phone calls 
+Emails sent 
+Emails opened 
+Website visits 
+Product demo requests 
+Meetings 
+Chatbot conversations 
+Example
+Date	Activity		Status
+10 June	Website Visit	Completed
+11 June	Email Sent		Delivered
+12 June	Email Opened	Yes
+13 June	Product Demo	Completed
+14 June	Follow-up Call	Pending
+
+Output: Complete interaction history is maintained.
+
+--- Slide 17 ---
+Step 5: AI Lead Analysis
+The AI engine analyzes customer behavior using collected data.
+AI Checks
+Number of website visits 
+Email open rate 
+Product pages viewed 
+Demo requests 
+Previous purchases 
+Industry match 
+Company size 
+Example
+Parameter			Result
+Website Visits			8
+Email Opens			6
+Demo Request			Yes
+Buying Intent			High
+Output: AI identifies highly interested prospects.
+
+--- Slide 18 ---
+Step 6: Lead Scoring
+The AI assigns a score based on the likelihood of conversion.
+Example Formula
+Lead Score =
+Company Fit = 30 
+Customer Engagement = 30 
+Budget = 20 
+Decision Maker Activity = 10 
+Buying Intent = 10 
+Total Score = 100
+Classification
+Score			Category
+81–100			Hot Lead
+61–80			Warm Lead
+41–60			Cold Lead
+0–40			Low Priority
+Output: Sales team focuses first on Hot Leads.
+
+--- Slide 19 ---
+Step 7: Sales Stage Tracking
+Each lead moves through predefined sales stages.
+Sales Lifecycle
+
+--- Slide 20 ---
+Example
+Lead ID		Current Stage
+L001		Product Demo
+
+--- Slide 21 ---
+
+
+
+==================================================
+FILE: Module 1 - work.pptx
+==================================================
+
+--- Slide 1 ---
+SalesGenie AI – AI Sales Assistant & Lead Intelligence Platform
+
+--- Slide 2 ---
+The platform gathers information from websites, CRM systems, emails, social media, and customer interactions to generate actionable insights. 
+It can automatically score leads, recommend the best prospects, personalize email responses, schedule follow-ups, predict customer buying behavior, and provide real-time sales recommendations.
+
+--- Slide 3 ---
+Key Features
+Lead Identification
+Lead Scoring
+Customer Profiling
+Email & Chat Automation
+Sales Forecasting
+Meeting Scheduling
+CRM Integration
+Real-Time Analytics
+
+--- Slide 4 ---
+Real-Time Example
+Scenario
+A software company sells cloud-based accounting software to small businesses.
+Step 1: Lead Discovery
+The AI platform scans business directories, LinkedIn, company websites, and online forms to identify businesses that may need accounting software.
+Example Lead
+Company: ABC Traders 
+Industry: Retail 
+Employees: 60 
+Location: Chennai 
+Annual Revenue: ₹15 Crore
+
+--- Slide 5 ---
+Step 2: Lead Intelligence
+The AI analyzes available information and generates insights:
+Parameter			Result
+Company Size		Medium
+Technology Used		Excel-based accounting
+Hiring Activity		Hiring accountants
+Website Visits		6 visits in last week
+Email Opens			5 out of 6 emails opened
+
+--- Slide 6 ---
+Step 3: AI Lead Score
+The platform calculates the probability of conversion.
+Factor						Score
+Company Fit					25/25
+Engagement						30/30
+Budget						20/20
+Decision Maker Interaction			20/20
+Buying Intent					5/5
+
+Final Lead Score = 100/100 (Hot Lead)
+
+--- Slide 7 ---
+Step 4: AI Recommendation
+The AI assistant suggests:
+Contact the Finance Manager today. 
+Offer a free 14-day product trial. 
+Highlight GST compliance and automated invoice generation. 
+Schedule a live demo within 24 hours.
+
+--- Slide 8 ---
+Step 5: Automated Personalized Email
+Subject: Simplify Your Accounting with AI-Powered Software
+Dear Mr. Kumar,
+I noticed that your company is expanding and may benefit from a modern accounting solution. Our AI-powered platform helps businesses automate GST filing, invoice generation, and financial reporting.
+Would you be available for a 20-minute product demonstration this week?
+
+Best Regards,
+Sales Team
+
+--- Slide 9 ---
+Step 6: Sales Outcome
+
+Before AI						After AI
+Manual lead search		AI automatically identifies leads
+Generic emails			Personalized emails
+Equal attention to all leads	Priority given to high-value leads
+Low conversion rate		Higher conversion rate
+Time-consuming follow-ups	Automated reminders and follow-ups
+
+--- Slide 10 ---
+Benefits
+Increases sales productivity. 
+Improves lead conversion rates. 
+Reduces manual work for sales teams. 
+Provides data-driven decision-making. 
+Enhances customer engagement through personalized communication. 
+Predicts customer buying intent more accurately. 
+Saves time by automating repetitive sales tasks.
+
+--- Slide 11 ---
+Real-World Examples
+Many organizations use AI-powered sales and lead intelligence platforms, including:
+Salesforce Einstein AI 
+HubSpot AI 
+Zoho Zia 
+Microsoft Dynamics 365 Sales
+
+--- Slide 12 ---
+Lead Management & Prospect Database  - Module 1
+Create and manage prospect and customer records. 
+Store company profiles, contact details, and engagement history. 
+Track lead lifecycle and sales stages.
+
+--- Slide 13 ---
+Step 1: Lead Registration
+A new lead enters the system through various sources such as:
+Company website contact form 
+Social media advertisements 
+Email campaigns 
+LinkedIn 
+Trade shows or exhibitions 
+Sales representative manual entry 
+Example
+Field					Value
+Lead ID					L001
+Company Name				ABC Traders
+Contact Person				Rahul Kumar
+Email					rahul@abctraders.com
+Phone					+91-9876543210
+Industry					Retail
+Source					Website
+Output: A new lead record is created in the prospect database.
+
+--- Slide 14 ---
+Step 2: Company Profile Creation
+The AI platform stores detailed company information.
+Information Stored
+Company name 
+Industry 
+Business size 
+Annual revenue 
+Location 
+Number of employees 
+Website 
+Products/Services 
+Example
+Company				ABC Traders
+Industry				Retail
+Employees				60
+Revenue				15 Crore
+City				Chennai
+Website				www.abctraders.com
+Output: Complete company profile available for future analysis.
+
+--- Slide 15 ---
+Step 3: Contact Management
+The platform records all important contacts within the company.
+Example
+Name				Position			Email			Phone
+Rahul Kumar			Finance Manager	rahul@abctraders.com	+91-9876543210
+Priya Sharma			IT Manager		priya@abctraders.com	+91-9876543200
+
+Output: Multiple contacts can be linked to one company.
+
+--- Slide 16 ---
+Step 4: Engagement History
+Every customer interaction is automatically stored.
+Activities Recorded
+Phone calls 
+Emails sent 
+Emails opened 
+Website visits 
+Product demo requests 
+Meetings 
+Chatbot conversations 
+Example
+Date	Activity		Status
+10 June	Website Visit	Completed
+11 June	Email Sent		Delivered
+12 June	Email Opened	Yes
+13 June	Product Demo	Completed
+14 June	Follow-up Call	Pending
+
+Output: Complete interaction history is maintained.
+
+--- Slide 17 ---
+Step 5: AI Lead Analysis
+The AI engine analyzes customer behavior using collected data.
+AI Checks
+Number of website visits 
+Email open rate 
+Product pages viewed 
+Demo requests 
+Previous purchases 
+Industry match 
+Company size 
+Example
+Parameter			Result
+Website Visits			8
+Email Opens			6
+Demo Request			Yes
+Buying Intent			High
+Output: AI identifies highly interested prospects.
+
+--- Slide 18 ---
+Step 6: Lead Scoring
+The AI assigns a score based on the likelihood of conversion.
+Example Formula
+Lead Score =
+Company Fit = 30 
+Customer Engagement = 30 
+Budget = 20 
+Decision Maker Activity = 10 
+Buying Intent = 10 
+Total Score = 100
+Classification
+Score			Category
+81–100			Hot Lead
+61–80			Warm Lead
+41–60			Cold Lead
+0–40			Low Priority
+Output: Sales team focuses first on Hot Leads.
+
+--- Slide 19 ---
+Step 7: Sales Stage Tracking
+Each lead moves through predefined sales stages.
+Sales Lifecycle
+
+--- Slide 20 ---
+Example
+Lead ID		Current Stage
+L001		Product Demo
+
+--- Slide 21 ---
+
+--- Slide 22 ---
+Complete Workflow
+New Lead
+      │
+      ▼
+Lead Database
+      │
+      ▼
+Company Details
+      │
+      ▼
+AI Analysis
+      │
+      ▼
+Qualification Score
+      │
+      ▼
+Technology Matching
+      │
+      ▼
+Decision Maker Identification
+      │
+      ▼
+Outreach (Email/LinkedIn)
+      │
+      ▼
+Sales Follow-up
+      │
+      ▼
+Deal Won / Lost
+
+--- Slide 23 ---
+1. Lead List Panel (Left Side)
+Purpose: Displays all prospects/customers available in the database.
+Features
+Search prospects
+Company Name
+Contact Person
+Designation
+Business Category
+Last Activity
+Select a lead to view complete information
+
+--- Slide 24 ---
+Example
+Company Name : TechCorp Solutions
+Contact Person : Sarah Johnson
+Designation : CTO
+Category : Enterprise
+Last Contact : 2 hours ago
+
+--- Slide 25 ---
+Python Code (Lead List) 
+class Lead:
+    def __init__(self, company, contact, designation, category):
+        self.company = company
+        self.contact = contact
+        self.designation = designation
+        self.category = category
+
+lead1 = Lead(
+    "TechCorp Solutions",
+    "Sarah Johnson",
+    "CTO",
+    "Enterprise"
+)
+
+print("Company :", lead1.company)
+print("Contact :", lead1.contact)
+print("Designation :", lead1.designation)
+print("Category :", lead1.category)
+
+--- Slide 26 ---
+Output
+Company : TechCorp Solutions
+Contact : Sarah Johnson
+Designation : CTO
+Category : Enterprise
+
+--- Slide 27 ---
+2. Company Details Panel (Center)
+This section stores complete company information.
+Information Stored
+Company Name
+Industry
+Company Size
+Annual Revenue
+Location
+Funding Stage
+Technology Stack
+
+--- Slide 28 ---
+Example
+Company Name : TechCorp Solutions
+
+Industry : Enterprise Software
+
+Company Size : 250-500 Employees
+
+Revenue : $45M-$60M
+
+Location : San Francisco
+
+Funding : Series C
+
+Technology :
+AWS
+Python
+React
+Node.js
+Kubernetes
+PostgreSQL
+
+--- Slide 29 ---
+Python Code
+company = {
+    "Company":"TechCorp Solutions",
+    "Industry":"Enterprise Software",
+    "Size":"250-500 Employees",
+    "Revenue":"$45M-$60M",
+    "Location":"San Francisco",
+    "Funding":"Series C",
+    "Technology":[
+        "AWS",
+        "Python",
+        "React",
+        "Node.js",
+        "Kubernetes",
+        "PostgreSQL"
+    ]
+}
+
+for key, value in company.items():
+    print(key,":",value)
+
+--- Slide 30 ---
+4. Outreach Button
+Used to send
+Email
+LinkedIn Message
+WhatsApp
+SMS
+to the selected lead.
+Example
+def send_email(name):
+    print("Email Sent Successfully to", name)
+
+send_email(company["Company"])
+Output
+Email Sent Successfully to TechCorp Solutions
+
+--- Slide 31 ---
+5. AI Lead Intelligence Panel
+This is the AI-powered recommendation engine.
+It analyzes
+Company profile
+Funding
+Technology
+Company growth
+Buying probability
+Then generates a Lead Score.
+Example
+Qualification Score
+
+92/100
+Higher score indicates higher probability of closing the deal.
+
+--- Slide 32 ---
+AI Scoring using Machine Learning
+from sklearn.tree import DecisionTreeClassifier
+
+X = [
+    [250,60,28],
+    [80,10,5],
+    [400,90,50],
+    [100,15,8]
+]
+
+y = [1,0,1,0]
+
+model = DecisionTreeClassifier()
+
+model.fit(X,y)
+
+prediction = model.predict([[300,55,30]])
+
+print(prediction)
+Output
+[1]
+Meaning
+1 = Qualified Lead
+0 = Not Qualified
+
+--- Slide 33 ---
+6. AI Recommendations
+The system automatically generates intelligent recommendations.
+Example
+High Growth Potential
+
+Series C Funding
+
+Budget available
+
+Expansion phase
+
+Good target
+
+--- Slide 34 ---
+Python
+score = 92
+
+if score > 90:
+    print("High Growth Potential")
+Output
+High Growth Potential
+
+--- Slide 35 ---
+7. Technology Alignment
+AI checks whether the prospect's technology matches your product.
+Example
+Python
+
+AWS
+
+React
+
+PostgreSQL
+
+Compatible
+Python
+company_stack = ["AWS","Python","React"]
+
+our_product = ["Python","AWS"]
+
+match = set(company_stack).intersection(our_product)
+
+print(match)
+Output
+{'Python', 'AWS'}
+
+--- Slide 36 ---
+8. Decision Maker Identification
+The platform identifies the correct person to contact.
+Example
+Sarah Johnson
+
+CTO
+
+Technical Decision Maker
+Python
+designation = "CTO"
+
+if designation == "CTO":
+    print("Technical Decision Maker")
+Output
+Technical Decision Maker
+
+--- Slide 37 ---
+9. Search Prospect
+Users can search companies instantly.
+Python
+companies = [
+    "TechCorp Solutions",
+    "InnovateAI Labs",
+    "CloudScale Inc"
+]
+
+search = "CloudScale"
+
+for company in companies:
+    if search.lower() in company.lower():
+        print(company)
+Output
+CloudScale Inc
+
+--- Slide 38 ---
+Technologies Used 
+Module						Python Technology
+User Interface				Streamlit / Flask
+Backend						Python
+Database						SQLite / MySQL
+Machine Learning			Scikit-learn
+Data Processing			Pandas, NumPy
+Visualization					Matplotlib / Plotly
+Email Automation			SMTP / SendGrid
+AI Lead Scoring				Decision Tree, Random 
+Forest, Logistic Regression
+REST APIs					Flask API / FastAPI
+
+
+
+==================================================
+FILE: Week 1.pptx
+==================================================
+
+--- Slide 1 ---
+SalesGenie AI – AI Sales Assistant & Lead Intelligence Platform
+
+--- Slide 2 ---
+Project Statement
+Modern sales teams spend a significant amount of time researching prospects, analysing company information, preparing outreach messages, tracking customer interactions, and identifying high-potential opportunities. 
+Manual lead qualification and sales outreach often result in inconsistent engagement, lower conversion rates, and reduced productivity. 
+This project aims to develop SalesGenie AI, an AI-powered Sales Assistant and Lead Intelligence Platform that automates lead analysis, prospect research, personalized outreach generation, sales conversation summarization, and follow-up recommendations. 
+By leveraging Large Language Models (LLMs), agentic AI workflows, CRM integrations, and sales intelligence analytics, the platform enables sales teams to focus on relationship building and revenue generation. 
+The solution improves lead conversion rates, streamlines sales operations, and enhances decision-making through actionable AI-driven insights.
+
+--- Slide 3 ---
+Outcomes
+Centralized prospect and lead management platform.
+AI-powered company profile analysis and lead intelligence generation.
+Personalized cold email and outreach message generation.
+Automated lead scoring based on conversion probability.
+AI-generated follow-up strategies and sales recommendations.
+Meeting and sales conversation summarization.
+CRM integration for seamless sales workflow management.
+Sales performance analytics and business intelligence dashboard.
+
+--- Slide 4 ---
+Modules to be Implemented
+Lead Management & Prospect Database
+Lead Intelligence & Company Analysis
+AI Outreach Generation
+Lead Scoring & Recommendation Engine
+Conversation Intelligence & CRM Integration
+Dashboard & Sales Analytics
+
+--- Slide 5 ---
+Week-wise Module Implementation & High-Level Requirements
+Milestone 1 (Weeks 1–2) – Lead Management & Intelligence Engine
+Milestone 2 (Weeks 3–4) – Outreach Generation & Lead Scoring
+Milestone 3 (Weeks 5–6) – CRM Integration & Conversation Intelligence
+Milestone 4 (Weeks 7–8) – Dashboard & Automation
+
+--- Slide 6 ---
+Workflow Diagram
+
+--- Slide 7 ---
+Architecture Diagram
+
+--- Slide 8 ---
+Database Schema
+
+--- Slide 9 ---
+Thank You
+
+
+
+==================================================
+FILE: streamlit.pptx
+==================================================
+
+--- Slide 1 ---
+Streamlit
+
+--- Slide 2 ---
+Streamlit
+Streamlit is an open-source Python library for building interactive web apps using only Python. 
+It's ideal for creating dashboards, data-driven web apps, reporting tools and interactive user interfaces without needing HTML, CSS or JavaScript.
+
+--- Slide 3 ---
+Streamlit Installation
+Make sure Python and pip are already installed on your system. To install Streamlit, run the following command in the command prompt or terminal:
+
+
+pip install streamlit
+
+--- Slide 4 ---
+How to run Streamlit file?
+To run a Streamlit app, open the command prompt or Anaconda prompt and type:
+streamlit run filename.py
+For example, if file name is sample.py, run:
+streamlit run sample.py
+After running the command, Streamlit starts a local development server and displays a URL (http://localhost:8501). Open this URL in your browser to view and interact with the app.
+
+--- Slide 5 ---
+Understanding Streamlit basic functions
+Streamlit offers simple built-in functions to create interactive web apps using Python. These functions help display text, add widgets, visualize data and handle user input.
+1. Title
+This basic Streamlit example displays a title on the web page, confirming that Streamlit is set up and running correctly.
+
+import streamlit as st
+st.title("Hello India !!!")
+
+--- Slide 6 ---
+2. Header and Subheader
+This example demonstrates how to add a header and subheader in a Streamlit app.
+
+st.header("This is a header") 
+st.subheader("This is a subheader")
+
+--- Slide 7 ---
+3. Text
+It shows how to display plain text in a Streamlit app using st.text() function.
+
+st.text("Hello India!!!")
+
+--- Slide 8 ---
+4. Markdown
+This example uses st.markdown() to show formatted text. The ### creates a level 3 header, used for medium-sized headings in the app.
+
+
+st.markdown("### This is a markdown")
+
+--- Slide 9 ---
+5. Success, Info, Warning, Error and Exception
+This example shows how to display different types of messages and alerts in a Streamlit app using built-in functions like st.success(), st.info(), st.warning(), st.error() and st.exception(). These functions help communicate status, information, warnings, errors and exceptions to users clearly.
+
+st.success("Success")
+
+st.info("Information")
+
+st.warning("Warning")
+
+st.error("Error")
+
+exp = ZeroDivisionError("Trying to divide by Zero")
+st.exception(exp)
+
+--- Slide 10 ---
+6. Write
+This example uses st.write() that can display text, numbers, data structures and even charts. Here, it's used to show plain text and the output of Python’s built-in range() function.
+
+st.write("Text with write")
+# Writing python inbuilt function range()
+st.write(range(10))
+
+--- Slide 11 ---
+7. Display Images
+This example demonstrates how to display an image using Pillow library. The image is opened with Image.open() and displayed with st.image(), where the width parameter controls its size.
+
+from PIL import Image  # Import Image from Pillow
+img = Image.open("streamlit.png") # Open the image file
+st.image(img, width=200) # Display the image with a specified width
+
+--- Slide 12 ---
+8. Checkbox
+This example uses a checkbox in Streamlit to toggle content visibility. When the checkbox labeled "Show/Hide" is checked, it displays a text message on the screen.
+
+# Display a checkbox with the label 'Show/Hide'
+if st.checkbox("Show/Hide"):
+# Show this text only when the checkbox is checked
+st.text("Showing the widget")
+
+--- Slide 13 ---
+9. Radio Button
+This example demonstrates how to use radio buttons to let users select one option from a list. Based on the selected gender, the app displays the result using st.success()
+# Create a radio button to select gender
+status = st.radio("Select Gender:", ['Male', 'Female'])
+# Display the selected option using success message
+if status == 'Male':
+   st.success("Male")
+else:
+    st.success("Female")
+
+--- Slide 14 ---
+10. Selection Box
+This example uses a select box in Streamlit to let users choose one option from a dropdown list. The selected item is then displayed on the screen.
+# Create a dropdown menu for selecting a hobby
+hobby = st.selectbox("Select a Hobby:", ['Dancing', 'Reading', 'Sports'])
+# Display the selected hobby
+st.write("Your hobby is:", hobby)
+
+--- Slide 15 ---
+11. Multi-Selectbox
+This example demonstrates how to use a multiselect box in Streamlit, allowing users to choose multiple options from a list. The app then displays the number of selected items.
+# Create a multiselect box for choosing hobbies
+hobbies = st.multiselect("Select Your Hobbies:", ['Dancing', 'Reading', 'Sports'])
+# Display the number of selected hobbies
+st.write("You selected", len(hobbies), "hobbies")
+
+--- Slide 16 ---
+12. Button
+This example shows how to use buttons in Streamlit. Buttons can trigger specific actions when clicked, such as displaying a message or running a function.
+
+# A simple button that does nothing
+st.button("Click Me")
+# A button that displays text when clicked
+if st.button("About"):
+    st.text("Welcome to INDIA!")
+
+--- Slide 17 ---
+13. Text Input
+Text input fields allow users to enter custom data. This example collects a user's name, formats it with proper capitalization and displays it when Submit button is clicked, simulating a basic form interaction.
+# Create a text input box with a default placeholder
+name = st.text_input("Enter your name", "Type here...")
+# Display the name after clicking the Submit button
+if st.button("Submit"):
+ result = name.title()  # Capitalize the first letter of each word
+st.success(result)
+
+--- Slide 18 ---
+14.  Slider
+Sliders provide a way to select numeric values within a range.
+This example lets users choose a level between 1 and 5 and displays the selected value instantly. It is useful for settings like ratings, difficulty levels or thresholds.
+# Create a slider to select a level between 1 and 5
+level = st.slider("Choose a level", min_value=1, max_value=5)
+# Display the selected level
+st.write(f"Selected level: {level}")
+
+--- Slide 19 ---
+import streamlit as st
+# Title of the app
+st.title("BMI Calculator")
+# Input: Weight in kilograms
+weight = st.number_input("Enter your weight (kg):", min_value=0.0, format="%.2f")
+# Input: Height format selection
+height_unit = st.radio("Select your height unit:", ['Centimeters', 'Meters', 'Feet'])
+# Input: Height value based on selected unit
+height = st.number_input(f"Enter your height ({height_unit.lower()}):", min_value=0.0, format="%.2f")
+# Calculate BMI when button is pressed
+if st.button("Calculate BMI"):
+    try:
+        # Convert height to meters based on selected unit
+        if height_unit == 'Centimeters':
+            height_m = height / 100
+        elif height_unit == 'Feet':
+            height_m = height / 3.28
+        else:
+            height_m = height
+
+--- Slide 20 ---
+# Prevent division by zero
+        if height_m <= 0:
+            st.error("Height must be greater than zero.")
+        else:
+            bmi = weight / (height_m ** 2)
+            st.success(f"Your BMI is {bmi:.2f}")
+# BMI interpretation
+            if bmi < 16:
+                st.error("You are Extremely Underweight")
+            elif 16 <= bmi < 18.5:
+                st.warning("You are Underweight")
+            elif 18.5 <= bmi < 25:
+                st.success("You are Healthy")
+            elif 25 <= bmi < 30:
+                st.warning("You are Overweight")
+            else:
+                st.error("You are Extremely Overweight")
+    except:
+        st.error("Please enter valid numeric values.")
+
+
+
