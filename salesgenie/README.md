@@ -96,7 +96,7 @@ Sales performance analytics and business intelligence dashboard with key metrics
 |-----------|-------|---------|--------|
 | **Milestone 1** — Lead Management & Intelligence Engine | Weeks 1–2 | Module 1 + Module 2 | ✅ Complete |
 | **Milestone 2** — Outreach Generation & Lead Scoring | Weeks 3–4 | Module 3 + Module 4 | ✅ Complete |
-| **Milestone 3** — CRM Integration & Conversation Intelligence | Weeks 5–6 | Module 5 | ⚠️ Core Features Complete |
+| **Milestone 3** — CRM Integration & Conversation Intelligence | Weeks 5–6 | Module 5 | ✅ Complete |
 | **Milestone 4** — Dashboard & Automation | Weeks 7–8 | Module 6 | ✅ Complete |
 
 ---
@@ -107,8 +107,9 @@ Sales performance analytics and business intelligence dashboard with key metrics
 | Component | Technology |
 |-----------|-----------|
 | Web Framework | **FastAPI** (Python) |
+| Authentication | **PyJWT** (JSON Web Tokens `HS256`) + PBKDF2-HMAC Password Hashing |
 | ASGI Server | **Uvicorn** |
-| Database | **SQLite** (relational, pre-seeded B2B lead profiles) |
+| Database | **SQLite** (relational, pre-seeded B2B lead profiles + users table) |
 | ML Lead Scoring | **Scikit-Learn** — `RandomForestClassifier` for conversion prediction |
 | Similar Deal Matching | **Scikit-Learn** — `TfidfVectorizer` + `linear_kernel` cosine similarity |
 | Data Processing | **Pandas**, **NumPy** |
@@ -132,9 +133,12 @@ Sales performance analytics and business intelligence dashboard with key metrics
 | `/api/auth/register` | `POST` | M5 | Register new user & return signed JWT access token |
 | `/api/auth/login` | `POST` | M5 | Authenticate credentials & return signed JWT access token |
 | `/api/auth/me` | `GET` | M5 | Protected endpoint to retrieve authenticated JWT user profile |
+| `/customer` | `POST` | M5 | Add customer record to CRM database |
+| `/crm/push` | `POST` | M5 | Push customer data to external CRM systems |
+| `/summarize` | `POST` | M5 | Summarize sales meeting transcript, sentiment & action items |
+| `/summary/{meeting_id}` | `GET` | M5 | Retrieve meeting summary by Meeting ID |
+| `/insights` | `POST` | M5 | Extract conversation insights (budget, interest, competitors) |
 | `/api/leads` | `GET` | M1 | Fetch filtered, sorted list of prospect leads |
-
-
 | `/api/leads` | `POST` | M1 | Register a new B2B prospect lead with auto-scoring |
 | `/api/leads/{id}` | `GET` | M1, M2 | Retrieve lead detail with ML augmentation, similar deals, activities |
 | `/api/leads/{id}` | `PUT` | M1 | Update a lead's metadata with score recalculation |
@@ -142,6 +146,7 @@ Sales performance analytics and business intelligence dashboard with key metrics
 | `/api/leads/{id}/activities` | `POST` | M5 | Log activity with auto stage progression & metric updates |
 | `/api/generate-outreach` | `POST` | M3 | Generate personalized outreach message (4 channels × 4 tones) |
 | `/api/analytics` | `GET` | M6 | Compute sales KPIs, distributions, and engagement data |
+
 
 ---
 
