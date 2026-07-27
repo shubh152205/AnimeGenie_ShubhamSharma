@@ -72,11 +72,12 @@ Predict conversion likelihood using AI models. Assign lead scores based on engag
 - **Next-Best-Action Recommendations** — Score-driven suggestions (schedule demo, send proposal, nurture with case studies)
 
 ### Module 5: Conversation Intelligence & CRM Integration
-Activity timeline logging, engagement history tracking, and automated stage progression.
+Activity timeline logging, engagement history tracking, automated stage progression, and user access security.
 
 - **Activity Logging** — Log phone calls, emails, demos, proposals with automatic metric updates
 - **Auto Stage Progression** — Activities trigger automatic sales stage advancement (e.g., demo request → "Product Demo" stage)
 - **Engagement Metrics Update** — Email opens, website visits, and demo requests auto-increment on relevant activities
+- **JWT Session Security** — User login/registration with signed JWT tokens (`HS256`, 24h expiration) and PBKDF2 password hashing
 
 ### Module 6: Dashboard & Sales Analytics
 Sales performance analytics and business intelligence dashboard with key metrics.
@@ -86,16 +87,6 @@ Sales performance analytics and business intelligence dashboard with key metrics
 - **Industry Analysis** — Lead distribution and conversion rates by industry
 - **Location Intelligence** — Average lead scores and counts by city/region
 - **Engagement Matrix** — Email opens vs. website visits correlation table with stage tracking
-
-### Module 7: JWT Authentication & User Session Security
-Secure authentication architecture using JSON Web Tokens (JWT).
-
-- **Stateless User Authentication** — Issue signed JWT tokens (`HS256`, 24h validity) on login/registration
-- **Password Hashing** — Secure PBKDF2-HMAC-SHA256 password hashing with dedicated salt
-- **Protected Dependencies** — `/api/auth/me` endpoint verifying Bearer tokens
-- **React Auth Management** — `useAuth` hook managing token storage in `localStorage`
-- **Interactive Auth Modal** — Dedicated UI dialog for instant login and user registration
-
 
 ---
 
@@ -138,10 +129,11 @@ Secure authentication architecture using JSON Web Tokens (JWT).
 | Endpoint | Method | Module | Description |
 |----------|:------:|--------|-------------|
 | `/` | `GET` | — | Server health check & documentation links |
-| `/api/auth/register` | `POST` | M7 | Register new user & return signed JWT access token |
-| `/api/auth/login` | `POST` | M7 | Authenticate credentials & return signed JWT access token |
-| `/api/auth/me` | `GET` | M7 | Protected endpoint to retrieve authenticated JWT user profile |
+| `/api/auth/register` | `POST` | M5 | Register new user & return signed JWT access token |
+| `/api/auth/login` | `POST` | M5 | Authenticate credentials & return signed JWT access token |
+| `/api/auth/me` | `GET` | M5 | Protected endpoint to retrieve authenticated JWT user profile |
 | `/api/leads` | `GET` | M1 | Fetch filtered, sorted list of prospect leads |
+
 
 | `/api/leads` | `POST` | M1 | Register a new B2B prospect lead with auto-scoring |
 | `/api/leads/{id}` | `GET` | M1, M2 | Retrieve lead detail with ML augmentation, similar deals, activities |

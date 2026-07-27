@@ -36,7 +36,7 @@ graph TD
 
 ## 📦 Modules
 
-The project is organized into **7 core modules**:
+The project is organized into **6 core modules**:
 
 ### Module 1: Lead Management & Prospect Database
 Create and manage prospect and customer records. Store company profiles, contact details, and engagement history. Track lead lifecycle and sales stages.
@@ -72,11 +72,12 @@ Predict conversion likelihood using AI models. Assign lead scores based on engag
 - **Next-Best-Action Recommendations** — Score-driven suggestions (schedule demo, send proposal, nurture with case studies)
 
 ### Module 5: Conversation Intelligence & CRM Integration
-Activity timeline logging, engagement history tracking, and automated stage progression.
+Activity timeline logging, engagement history tracking, automated stage progression, and user access security.
 
 - **Activity Logging** — Log phone calls, emails, demos, proposals with automatic metric updates
 - **Auto Stage Progression** — Activities trigger automatic sales stage advancement (e.g., demo request → "Product Demo" stage)
 - **Engagement Metrics Update** — Email opens, website visits, and demo requests auto-increment on relevant activities
+- **JWT Session Security** — User login/registration with signed JWT tokens (`HS256`, 24h expiration) and PBKDF2 password hashing
 
 ### Module 6: Dashboard & Sales Analytics
 Sales performance analytics and business intelligence dashboard with key metrics.
@@ -87,15 +88,6 @@ Sales performance analytics and business intelligence dashboard with key metrics
 - **Location Intelligence** — Average lead scores and counts by city/region
 - **Engagement Matrix** — Email opens vs. website visits correlation table with stage tracking
 
-### Module 7: JWT Authentication & User Session Security
-Secure authentication architecture using JSON Web Tokens (JWT).
-
-- **Stateless User Authentication** — Issue signed JWT tokens (`HS256`, 24h validity) on login/registration
-- **Password Hashing** — Secure PBKDF2-HMAC-SHA256 password hashing with dedicated salt
-- **Protected Dependencies** — `/api/auth/me` endpoint verifying Bearer tokens
-- **React Auth Management** — `useAuth` hook managing token storage in `localStorage`
-- **Interactive Auth Modal** — Dedicated UI dialog for instant login and user registration
-
 ---
 
 ## 📅 Milestones
@@ -105,7 +97,8 @@ Secure authentication architecture using JSON Web Tokens (JWT).
 | **Milestone 1** — Lead Management & Intelligence Engine | Weeks 1–2 | Module 1 + Module 2 | ✅ Complete |
 | **Milestone 2** — Outreach Generation & Lead Scoring | Weeks 3–4 | Module 3 + Module 4 | ✅ Complete |
 | **Milestone 3** — CRM Integration & Conversation Intelligence | Weeks 5–6 | Module 5 | ⚠️ Core Features Complete |
-| **Milestone 4** — Dashboard & Automation | Weeks 7–8 | Module 6 + Module 7 | ✅ Complete |
+| **Milestone 4** — Dashboard & Automation | Weeks 7–8 | Module 6 | ✅ Complete |
+
 
 ---
 
