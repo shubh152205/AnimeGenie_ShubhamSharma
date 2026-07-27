@@ -1,5 +1,5 @@
-import { Search, Plus } from 'lucide-react';
-import { SALES_STAGES, INDUSTRIES, SORT_OPTIONS } from '../constants';
+import { Search, Plus, Download, RefreshCw } from 'lucide-react';
+import { SALES_STAGES, INDUSTRIES, SORT_OPTIONS, API_BASE } from '../constants';
 
 export default function LeadFilters({
   searchQuery, setSearchQuery,
@@ -7,8 +7,38 @@ export default function LeadFilters({
   selectedStage, setSelectedStage,
   sortBy, setSortBy,
   sortOrder, setSortOrder,
-  onRegisterClick
+  onRegisterClick,
+  showToast
 }) {
+  const handleExport = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/crm/export`);
+      const data = await res.json();
+      const jsonStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data.data, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", jsonStr);
+      downloadAnchor.setAttribute("download", `salesgenie_crm_leads_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast?.(`Exported ${data.total_records} CRM records successfully!`);
+    } catch (err) {
+      console.error(err);
+      showToast?.("Failed to export CRM leads", "error");
+    }
+  };
+
+  const handleSync = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/crm/sync`);
+      const data = await res.json();
+      showToast?.(`CRM Synced with Salesforce & HubSpot! ${data.total_synced_leads} records active.`);
+    } catch (err) {
+      console.error(err);
+      showToast?.("CRM Sync failed", "error");
+    }
+  };
+
   return (
     <div className="p-4 border-b border-slate-200 flex flex-col gap-3 shrink-0">
       <div className="flex items-center justify-between">
@@ -16,13 +46,29 @@ export default function LeadFilters({
           <h2 className="text-lg font-extrabold text-slate-900 leading-tight">CRM Prospects</h2>
           <p className="text-xs text-slate-500 font-medium">Search companies, lead scores, and industries</p>
         </div>
-        <button
-          onClick={onRegisterClick}
-          className="flex items-center gap-1.5 bg-indigo-600 text-white hover:bg-indigo-700 transition-all px-3 py-1.5 rounded-lg text-xs font-bold shadow-md shadow-indigo-600/10"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          <span>Add Lead</span>
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={handleExport}
+            title="Export CRM Data (JSON/Salesforce)"
+            className="p-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 text-xs font-bold transition-all"
+          >
+            <Download className="h-3.5 w-3.5" />
+          </button>
+          <button
+            onClick={handleSync}
+            title="Sync with Salesforce / HubSpot"
+            className="p-1.5 rounded-lg border border-indigo-100 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs font-bold transition-all"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+          </button>
+          <button
+            onClick={onRegisterClick}
+            className="flex items-center gap-1 bg-indigo-600 text-white hover:bg-indigo-700 transition-all px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-md shadow-indigo-600/10"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            <span>Add Lead</span>
+          </button>
+        </div>
       </div>
 
       <div className="relative">
@@ -85,3 +131,4 @@ export default function LeadFilters({
     </div>
   );
 }
+

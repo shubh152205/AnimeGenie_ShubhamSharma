@@ -230,6 +230,108 @@ def find_similar_deals(lead_id: int, limit: int = 3):
 
 
 # ---------------------------------------------------------------------------
+# Follow-Up Timing & Channel Mix Strategy (Milestone 2 & Module 4)
+# ---------------------------------------------------------------------------
+
+def get_followup_timing(score: int) -> str:
+    if score >= 80:
+        return "⚡ Immediate Outreach (Within 24 Hours)"
+    elif score >= 60:
+        return "📅 High Priority Follow-Up (Within 48 Hours)"
+    elif score >= 40:
+        return "🗓️ Standard Touchpoint (Within 5 Business Days)"
+    return "☕ Long-Term Nurturing (Monthly Cadence)"
+
+
+def get_recommended_channel(designation: str, industry: str) -> str:
+    des = designation.lower()
+    ind = industry.lower()
+    if "cto" in des or "cio" in des or "engineering" in des or "tech" in des:
+        return "LinkedIn InMail & Technical Whitepaper PDF"
+    elif "ceo" in des or "founder" in des or "cfo" in des or "president" in des:
+        return "Personalized Executive Email & 15-min Call Invite"
+    elif "retail" in ind or "logistics" in ind:
+        return "WhatsApp Business Chat & Quick Video Demo"
+    else:
+        return "Multi-Touch: Email Pitch followed by LinkedIn Connection"
+
+
+def get_content_strategy(industry: str, pain_point: str) -> dict:
+    ind = industry.lower()
+    if "tech" in ind:
+        angle = "Focus on API performance, cloud cost optimization, and developer productivity gains."
+        case_study = "TechCorp Enterprise Cloud Scale Case Study"
+    elif "health" in ind:
+        angle = "Emphasize HIPAA-compliant workflows, data privacy, and patient turnaround speed."
+        case_study = "MediLife Patient Workflow Automation Study"
+    elif "finance" in ind:
+        angle = "Highlight security standards, regulatory compliance, and high ROI metrics."
+        case_study = "FinServe Institutional Compliance Case Study"
+    elif "education" in ind:
+        angle = "Highlight student portal integration, scalability during term starts, and ease of use."
+        case_study = "EduLearn Digital Learning Campus Study"
+    else:
+        angle = f"Focus on ROI, operational cost reduction, and addressing: '{pain_point or 'workflow bottlenecks'}'."
+        case_study = "B2B Operational Efficiency Benchmark Study"
+    return {"angle": angle, "case_study": case_study}
+
+
+# ---------------------------------------------------------------------------
+# Conversation Intelligence (Milestone 3 & Module 5)
+# ---------------------------------------------------------------------------
+
+def analyze_conversation_transcript(transcript: str) -> dict:
+    """Analyze a call/meeting transcript to extract sentiment, key takeaways, action items, and suggested activity status."""
+    t_lower = transcript.lower()
+
+    # Sentiment detection
+    pos_words = ["great", "interested", "excited", "budget", "demo", "buy", "approve", "next step", "love", "impressive", "send proposal"]
+    neg_words = ["expensive", "not interested", "budget issue", "delay", "competitor", "cancel", "objection", "too high", "busy"]
+
+    pos_count = sum(1 for w in pos_words if w in t_lower)
+    neg_count = sum(1 for w in neg_words if w in t_lower)
+
+    if pos_count > neg_count and pos_count >= 2:
+        sentiment = "Positive - High Intent"
+        suggested_stage = "Proposal Sent" if "proposal" in t_lower else "Product Demo"
+    elif neg_count > pos_count:
+        sentiment = "Needs Attention - Objections Raised"
+        suggested_stage = None
+    else:
+        sentiment = "Neutral / Exploratory"
+        suggested_stage = "Contacted"
+
+    # Key takeaways extraction
+    takeaways = []
+    if "budget" in t_lower or "price" in t_lower or "cost" in t_lower:
+        takeaways.append("Prospect discussed budget and pricing structure.")
+    if "timeline" in t_lower or "month" in t_lower or "quarter" in t_lower:
+        takeaways.append("Implementation timeline was addressed.")
+    if "security" in t_lower or "compliance" in t_lower or "aws" in t_lower:
+        takeaways.append("Technical security and infrastructure requirements mentioned.")
+    if "demo" in t_lower or "presentation" in t_lower:
+        takeaways.append("Product demo was evaluated by technical decision makers.")
+    if not takeaways:
+        takeaways.append("General discovery call covering current pain points and operational scope.")
+
+    # Action items
+    action_items = []
+    if "proposal" in t_lower or "quote" in t_lower:
+        action_items.append("Send customized commercial proposal with ROI breakdown.")
+    if "technical" in t_lower or "api" in t_lower or "integration" in t_lower:
+        action_items.append("Schedule technical architecture call with Solutions Engineer.")
+    if not action_items:
+        action_items.append("Follow up within 48 hours with supplementary case study material.")
+
+    return {
+        "sentiment": sentiment,
+        "key_takeaways": takeaways,
+        "action_items": action_items,
+        "suggested_stage": suggested_stage,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Lead augmentation helper (used by routers)
 # ---------------------------------------------------------------------------
 
@@ -242,6 +344,9 @@ def augment_lead(lead: dict, include_activities: bool = False) -> dict:
     lead['decision_maker_type'] = get_decision_maker_info(lead['designation'])
     lead['tech_alignment'] = get_tech_alignment(lead['technology'])
     lead['next_action'] = get_next_action(lead['score'])
+    lead['followup_timing'] = get_followup_timing(lead['score'])
+    lead['recommended_channel'] = get_recommended_channel(lead['designation'], lead['industry'])
+    lead['content_strategy'] = get_content_strategy(lead['industry'], lead.get('pain_point', ''))
     lead['similar_deals'] = find_similar_deals(lead['id'], limit=3)
 
     if include_activities:
@@ -252,3 +357,4 @@ def augment_lead(lead: dict, include_activities: bool = False) -> dict:
         lead['activities'] = [dict(a) for a in activities]
 
     return lead
+

@@ -7,8 +7,9 @@ import AIBanner from '../components/AIBanner';
 import CompanyInfo from '../components/CompanyInfo';
 import SimilarDeals from '../components/SimilarDeals';
 import ActivityTimeline from '../components/ActivityTimeline';
+import ConversationIntelligence from '../components/ConversationIntelligence';
 
-export default function LeadDetailView({ leadDetail, onStageChange, onDelete, onQuickActivity, onSelectDeal }) {
+export default function LeadDetailView({ leadDetail, onStageChange, onDelete, onQuickActivity, onSelectDeal, showToast }) {
   if (!leadDetail) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center py-20 text-center text-slate-400">
@@ -72,8 +73,8 @@ export default function LeadDetailView({ leadDetail, onStageChange, onDelete, on
         <TechAlignmentCard techAlignment={leadDetail.tech_alignment} />
       </div>
 
-      {/* AI Recommendation */}
-      <AIBanner nextAction={leadDetail.next_action} />
+      {/* AI Recommendation Banner & Strategy */}
+      <AIBanner leadDetail={leadDetail} />
 
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -81,8 +82,16 @@ export default function LeadDetailView({ leadDetail, onStageChange, onDelete, on
         <SimilarDeals similarDeals={leadDetail.similar_deals} onSelect={onSelectDeal} />
       </div>
 
+      {/* Conversation Intelligence */}
+      <ConversationIntelligence
+        leadId={leadDetail.id}
+        onActivityAdded={() => onQuickActivity?.('Call Log Analyzed', 'Completed')}
+        showToast={showToast}
+      />
+
       {/* Activity Timeline */}
       <ActivityTimeline activities={leadDetail.activities} onQuickActivity={onQuickActivity} />
     </div>
   );
 }
+

@@ -57,6 +57,7 @@ export default function LeadsExplorer({
           sortBy={sortBy} setSortBy={setSortBy}
           sortOrder={sortOrder} setSortOrder={setSortOrder}
           onRegisterClick={openRegisterForm}
+          showToast={showToast}
         />
 
         <div className="flex-1 overflow-y-auto bg-slate-50/50 p-3 space-y-2.5">
@@ -100,8 +101,10 @@ export default function LeadsExplorer({
             onDelete={onDelete}
             onQuickActivity={onQuickActivity}
             onSelectDeal={(id) => setSelectedLeadId?.(id)}
+            showToast={showToast}
           />
         )}
+
       </section>
     </div>
   );
