@@ -22,13 +22,15 @@ Modern sales teams spend a significant amount of time researching prospects, ana
 
 ```mermaid
 graph TD
-    A[Vite / React Frontend] -->|REST APIs| B[FastAPI Backend Server]
+    A[Vite / React Frontend] -->|JWT Auth & REST APIs| B[FastAPI Backend Server]
+    B -->|Authenticate & Issue Tokens| H[PyJWT Authentication Engine]
     B -->|Query & Mutate| C[(SQLite sales.db)]
     B -->|Predict Conversion| D[RandomForest Classifier]
     B -->|Find Similar Deals| E[TF-IDF Cosine Similarity]
     B -->|Draft Outreaches| F[Personalized Outreach Engine]
     B -->|Score Leads| G[Rule-Based Scoring Engine]
 ```
+
 
 ---
 
@@ -85,6 +87,16 @@ Sales performance analytics and business intelligence dashboard with key metrics
 - **Location Intelligence** — Average lead scores and counts by city/region
 - **Engagement Matrix** — Email opens vs. website visits correlation table with stage tracking
 
+### Module 7: JWT Authentication & User Session Security
+Secure authentication architecture using JSON Web Tokens (JWT).
+
+- **Stateless User Authentication** — Issue signed JWT tokens (`HS256`, 24h validity) on login/registration
+- **Password Hashing** — Secure PBKDF2-HMAC-SHA256 password hashing with dedicated salt
+- **Protected Dependencies** — `/api/auth/me` endpoint verifying Bearer tokens
+- **React Auth Management** — `useAuth` hook managing token storage in `localStorage`
+- **Interactive Auth Modal** — Dedicated UI dialog for instant login and user registration
+
+
 ---
 
 ## 📅 Milestones
@@ -126,7 +138,11 @@ Sales performance analytics and business intelligence dashboard with key metrics
 | Endpoint | Method | Module | Description |
 |----------|:------:|--------|-------------|
 | `/` | `GET` | — | Server health check & documentation links |
+| `/api/auth/register` | `POST` | M7 | Register new user & return signed JWT access token |
+| `/api/auth/login` | `POST` | M7 | Authenticate credentials & return signed JWT access token |
+| `/api/auth/me` | `GET` | M7 | Protected endpoint to retrieve authenticated JWT user profile |
 | `/api/leads` | `GET` | M1 | Fetch filtered, sorted list of prospect leads |
+
 | `/api/leads` | `POST` | M1 | Register a new B2B prospect lead with auto-scoring |
 | `/api/leads/{id}` | `GET` | M1, M2 | Retrieve lead detail with ML augmentation, similar deals, activities |
 | `/api/leads/{id}` | `PUT` | M1 | Update a lead's metadata with score recalculation |
@@ -192,7 +208,21 @@ salesgenie/
 
 ---
 
+## 🔐 How to Find & Use the JWT Sign-In Screen
+
+1. **Location in UI**: Look at the **bottom of the left navigation sidebar** (`Sidebar.jsx`).
+2. **Button Name**: You will see a button labeled **`🔐 JWT Sign In / Register`**.
+3. **Opening the Screen**: Click the button to launch the glassmorphic **JWT Authentication Modal** right in the center of your screen.
+4. **Demo Credentials**:
+   - **Username**: `admin`
+   - **Password**: `admin123`
+5. **Registration**: Click **Register Now** inside the modal to create a new user account with email verification and instant token issuance.
+6. **Mobile Navigation**: On mobile/small screens, tap the top-left hamburger menu icon to open the sidebar, then scroll down to tap the **JWT Sign In / Register** button.
+
+---
+
 ## 🚀 How to Run the Project
+
 
 ### Prerequisites
 - Python 3.8+

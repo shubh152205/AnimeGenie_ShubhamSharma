@@ -15,6 +15,7 @@ Modern sales teams spend a significant amount of time researching prospects, ana
 - Automated lead scoring based on conversion probability
 - AI-generated follow-up strategies and sales recommendations
 - Sales performance analytics and business intelligence dashboard
+- Secure JWT (JSON Web Token) user authentication & session management
 
 ---
 
@@ -22,7 +23,8 @@ Modern sales teams spend a significant amount of time researching prospects, ana
 
 ```mermaid
 graph TD
-    A[Vite / React Frontend] -->|REST APIs| B[FastAPI Backend Server]
+    A[Vite / React Frontend] -->|JWT Auth & REST APIs| B[FastAPI Backend Server]
+    B -->|Authenticate & Issue Tokens| H[PyJWT Authentication Engine]
     B -->|Query & Mutate| C[(SQLite sales.db)]
     B -->|Predict Conversion| D[RandomForest Classifier]
     B -->|Find Similar Deals| E[TF-IDF Cosine Similarity]
@@ -34,7 +36,7 @@ graph TD
 
 ## 📦 Modules
 
-The project is organized into **6 core modules**:
+The project is organized into **7 core modules**:
 
 ### Module 1: Lead Management & Prospect Database
 Create and manage prospect and customer records. Store company profiles, contact details, and engagement history. Track lead lifecycle and sales stages.
@@ -85,6 +87,15 @@ Sales performance analytics and business intelligence dashboard with key metrics
 - **Location Intelligence** — Average lead scores and counts by city/region
 - **Engagement Matrix** — Email opens vs. website visits correlation table with stage tracking
 
+### Module 7: JWT Authentication & User Session Security
+Secure authentication architecture using JSON Web Tokens (JWT).
+
+- **Stateless User Authentication** — Issue signed JWT tokens (`HS256`, 24h validity) on login/registration
+- **Password Hashing** — Secure PBKDF2-HMAC-SHA256 password hashing with dedicated salt
+- **Protected Dependencies** — `/api/auth/me` endpoint verifying Bearer tokens
+- **React Auth Management** — `useAuth` hook managing token storage in `localStorage`
+- **Interactive Auth Modal** — Dedicated UI dialog for instant login and user registration
+
 ---
 
 ## 📅 Milestones
@@ -94,7 +105,7 @@ Sales performance analytics and business intelligence dashboard with key metrics
 | **Milestone 1** — Lead Management & Intelligence Engine | Weeks 1–2 | Module 1 + Module 2 | ✅ Complete |
 | **Milestone 2** — Outreach Generation & Lead Scoring | Weeks 3–4 | Module 3 + Module 4 | ✅ Complete |
 | **Milestone 3** — CRM Integration & Conversation Intelligence | Weeks 5–6 | Module 5 | ⚠️ Core Features Complete |
-| **Milestone 4** — Dashboard & Automation | Weeks 7–8 | Module 6 | ✅ Complete |
+| **Milestone 4** — Dashboard & Automation | Weeks 7–8 | Module 6 + Module 7 | ✅ Complete |
 
 ---
 
@@ -104,8 +115,9 @@ Sales performance analytics and business intelligence dashboard with key metrics
 | Component | Technology |
 |-----------|-----------|
 | Web Framework | **FastAPI** (Python) |
+| Authentication | **PyJWT** (JSON Web Tokens `HS256`) + PBKDF2-HMAC Password Hashing |
 | ASGI Server | **Uvicorn** |
-| Database | **SQLite** (relational, pre-seeded B2B lead profiles) |
+| Database | **SQLite** (relational, pre-seeded B2B lead profiles + users table) |
 | ML Lead Scoring | **Scikit-Learn** — `RandomForestClassifier` for conversion prediction |
 | Similar Deal Matching | **Scikit-Learn** — `TfidfVectorizer` + `linear_kernel` cosine similarity |
 | Data Processing | **Pandas**, **NumPy** |
@@ -126,6 +138,9 @@ Sales performance analytics and business intelligence dashboard with key metrics
 | Endpoint | Method | Module | Description |
 |----------|:------:|--------|-------------|
 | `/` | `GET` | — | Server health check & documentation links |
+| `/api/auth/register` | `POST` | M7 | Register new user & return signed JWT access token |
+| `/api/auth/login` | `POST` | M7 | Authenticate credentials & return signed JWT access token |
+| `/api/auth/me` | `GET` | M7 | Protected endpoint to retrieve authenticated JWT user profile |
 | `/api/leads` | `GET` | M1 | Fetch filtered, sorted list of prospect leads |
 | `/api/leads` | `POST` | M1 | Register a new B2B prospect lead with auto-scoring |
 | `/api/leads/{id}` | `GET` | M1, M2 | Retrieve lead detail with ML augmentation, similar deals, activities |
@@ -137,59 +152,16 @@ Sales performance analytics and business intelligence dashboard with key metrics
 
 ---
 
-## 📂 Project Structure
+## 🔐 How to Find & Use the JWT Sign-In Screen
 
-```
-salesgenie/
-├── backend/                       # Python FastAPI Backend
-│   ├── server.py                  # FastAPI app entry point
-│   ├── database.py                # SQLite connection helpers
-│   ├── models.py                  # Pydantic request models
-│   ├── ml_engine.py               # ML scoring & TF-IDF engine
-│   ├── create_db.py               # Database seeder with mock B2B leads
-│   ├── requirements.txt           # Python dependencies
-│   ├── sales.db                   # SQLite database
-│   └── routers/
-│       ├── leads.py               # Leads CRUD + activity logging (M1, M5)
-│       ├── outreach.py            # AI outreach generation (M3)
-│       └── analytics.py           # Sales analytics aggregation (M6)
-├── src/                           # React Frontend
-│   ├── App.jsx                    # Main app with tab routing
-│   ├── constants.js               # Shared config & constants
-│   ├── pages/
-│   │   ├── LeadsExplorer.jsx      # Lead list + detail view (M1)
-│   │   ├── LeadDetailView.jsx     # Single lead panel (M1, M2)
-│   │   ├── DealPipeline.jsx       # Kanban sales pipeline (M1)
-│   │   ├── AIOutreachGenerator.jsx # Outreach composer (M3)
-│   │   └── AnalyticsDashboard.jsx # Sales analytics charts (M6)
-│   ├── components/
-│   │   ├── Sidebar.jsx            # Navigation sidebar
-│   │   ├── LeadCard.jsx           # Lead list card
-│   │   ├── LeadFilters.jsx        # Search & filter controls + CRM Export/Sync
-│   │   ├── LeadRegisterForm.jsx   # New lead registration form
-│   │   ├── CompanyInfo.jsx        # Company profile display (M1)
-│   │   ├── ScoreGauge.jsx         # Circular score meter (M4)
-│   │   ├── MLConversionCard.jsx   # ML probability display (M4)
-│   │   ├── TechAlignmentCard.jsx  # Tech stack alignment (M2)
-│   │   ├── SimilarDeals.jsx       # TF-IDF similar deals (M2)
-│   │   ├── ActivityTimeline.jsx   # Activity history log (M5)
-│   │   ├── ConversationIntelligence.jsx # AI Call Summarizer & Transcript NLP (M5)
-│   │   ├── AIBanner.jsx           # AI strategy matrix & channel recommendations (M4)
-│   │   ├── MobileTopBar.jsx       # Mobile responsive header
-│   │   └── Toast.jsx              # Notification system
-│   └── hooks/                     # Custom React hooks
-│       ├── useLeads.js            # Leads list state management
-│       ├── useLeadDetail.js       # Lead detail fetching
-│       ├── useLeadActions.js      # Activity/stage/delete actions
-│       ├── useAnalytics.js        # Analytics data fetching
-│       ├── useOutreach.js         # Outreach generation
-│       └── useToast.js            # Toast notifications
-├── index.html                     # HTML entry point
-├── package.json                   # Node dependencies
-├── vite.config.js                 # Vite configuration
-├── tailwind.config.js             # Tailwind CSS configuration
-└── postcss.config.js              # PostCSS configuration
-```
+1. **Location in UI**: Look at the **bottom of the left navigation sidebar** (`Sidebar.jsx`).
+2. **Button Name**: You will see a button labeled **`🔐 JWT Sign In / Register`**.
+3. **Opening the Screen**: Click the button to launch the glassmorphic **JWT Authentication Modal** right in the center of your screen.
+4. **Demo Credentials**:
+   - **Username**: `admin`
+   - **Password**: `admin123`
+5. **Registration**: Click **Register Now** inside the modal to create a new user account with email verification and instant token issuance.
+6. **Mobile Navigation**: On mobile/small screens, tap the top-left hamburger menu icon to open the sidebar, then scroll down to tap the **JWT Sign In / Register** button.
 
 ---
 
@@ -217,27 +189,6 @@ npm run dev
 
 ---
 
-## 🌟 Key Features Summary
-
-| Feature | Module | Description |
-|---------|--------|-------------|
-| 🔍 Leads Explorer | M1 | Search, filter, sort prospects by industry/stage/score |
-| 📋 Deal Pipeline Kanban | M1 | Visual 6-column sales stage tracker |
-| 🤖 AI Outreach Generator | M3 | Multi-channel, multi-tone personalized messages |
-| 📊 Analytics Dashboard | M6 | 5 KPI cards + 5 chart panels |
-| 🧠 ML Lead Scoring | M4 | RandomForest conversion prediction |
-| 🗣️ Conversation Intelligence | M5 | Call transcript NLP sentiment, takeaways, and action items |
-| 🎯 AI Sales Strategy | M4 | Optimal timing, channel mix, and content strategy |
-| 🔗 CRM Integration | M5 | External data export (Salesforce/HubSpot) & sync status |
-| 🔗 TF-IDF Deal Matching | M2 | Similar converted deals finder |
-| 🎯 Tech Stack Alignment | M2 | Product compatibility scoring |
-| 👤 Decision Maker ID | M2 | Contact role classification |
-| ⏱️ Activity Timeline | M5 | Engagement logging with auto-progression |
-| 📝 Lead Registration | M1 | Full CRUD with auto-scoring |
-
----
-
 ## 📄 License
 
 This project was developed as part of the **Infosys Springboard Internship Program**.
-
