@@ -12,7 +12,8 @@ router = APIRouter(prefix="/api", tags=["Outreach"])
 # Initialize NVIDIA OpenAI Client as requested
 NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY", "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")
 NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1"
-MODEL_NAME = "z-ai/glm-5.2"
+MODEL_NAME = os.getenv("NVIDIA_MODEL", "meta/llama-3.1-8b-instruct")
+
 
 client = None
 try:

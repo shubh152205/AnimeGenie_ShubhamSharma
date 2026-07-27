@@ -104,9 +104,10 @@ export default function AIOutreachGenerator({
                   <span className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded text-[10px]">{generatedOutreach.tone}</span>
                   {generatedOutreach.ai_generated && (
                     <span className="bg-emerald-50 text-emerald-700 border border-emerald-200/80 px-2 py-0.5 rounded text-[9.5px] font-extrabold flex items-center gap-1">
-                      <Sparkles className="h-3 w-3 text-emerald-500" /> NVIDIA GLM-5.2
+                      <Sparkles className="h-3 w-3 text-emerald-500" /> {generatedOutreach.model || "NVIDIA LLM"}
                     </span>
                   )}
+
                 </div>
 
                 <button
