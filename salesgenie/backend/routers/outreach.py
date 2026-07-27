@@ -1,9 +1,94 @@
+import os
+import sys
+import json
 from fastapi import APIRouter, HTTPException
 
 from database import fetchone
 from models import OutreachRequest
+from openai import OpenAI
 
 router = APIRouter(prefix="/api", tags=["Outreach"])
+
+# Initialize NVIDIA OpenAI Client as requested
+NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY", "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")
+NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1"
+MODEL_NAME = "z-ai/glm-5.2"
+
+client = None
+try:
+    client = OpenAI(
+        base_url=NVIDIA_BASE_URL,
+        api_key=NVIDIA_API_KEY
+    )
+except Exception as e:
+    print(f"NVIDIA API Client initialization warning: {e}")
+
+
+def generate_nvidia_ai_outreach(lead: dict, channel: str, tone: str) -> dict:
+    """Use NVIDIA GLM-5.2 API to generate AI outreach message with streaming."""
+    if not client:
+        return None
+
+    prompt = (
+        f"You are an expert sales representative writing a personalized outreach message for a prospect.\n"
+        f"Lead Details:\n"
+        f"- Contact Name: {lead['contact_name']} ({lead['designation']})\n"
+        f"- Company: {lead['company']} (Industry: {lead['industry']}, Location: {lead['location']})\n"
+        f"- Funding Status: {lead['funding']}, Revenue: {lead['revenue']}\n"
+        f"- Pain Point / Challenge: {lead.get('pain_point') or 'scaling operations'}\n\n"
+        f"Channel: {channel}\n"
+        f"Tone: {tone}\n\n"
+        f"Instructions:\n"
+        f"Create a subject line and message body. Format your response strictly as JSON with keys 'subject' and 'message'.\n"
+        f"Example: {{\"subject\": \"...\", \"message\": \"...\"}}"
+    )
+
+    try:
+        completion = client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            top_p=1,
+            max_tokens=1024,
+            seed=42,
+            stream=True
+        )
+
+        full_content = ""
+        for chunk in completion:
+            if not getattr(chunk, "choices", None):
+                continue
+            if len(chunk.choices) == 0 or getattr(chunk.choices[0], "delta", None) is None:
+                continue
+            delta = chunk.choices[0].delta
+            if getattr(delta, "content", None) is not None:
+                full_content += delta.content
+
+        full_content = full_content.strip()
+        
+        # Parse JSON from AI response if available
+        if "{" in full_content and "}" in full_content:
+            json_str = full_content[full_content.find("{"):full_content.rfind("}")+1]
+            parsed = json.loads(json_str)
+            if "subject" in parsed and "message" in parsed:
+                return {
+                    "subject": parsed["subject"],
+                    "message": parsed["message"],
+                    "ai_generated": True,
+                    "model": MODEL_NAME
+                }
+        
+        # Fallback if text wasn't strict JSON
+        if full_content:
+            return {
+                "subject": f"{tone} Outreach for {lead['company']}",
+                "message": full_content,
+                "ai_generated": True,
+                "model": MODEL_NAME
+            }
+    except Exception as e:
+        print(f"NVIDIA GLM-5.2 API call error/fallback: {e}")
+        return None
 
 
 @router.post("/generate-outreach")
@@ -13,6 +98,20 @@ def generate_outreach(req: OutreachRequest):
         raise HTTPException(status_code=404, detail="Lead not found")
 
     lead = dict(row)
+
+    # Try generating with NVIDIA GLM-5.2 API first
+    ai_result = generate_nvidia_ai_outreach(lead, req.channel, req.tone)
+    if ai_result:
+        return {
+            "channel": req.channel,
+            "tone": req.tone,
+            "subject": ai_result["subject"],
+            "message": ai_result["message"],
+            "ai_generated": True,
+            "model": ai_result.get("model", MODEL_NAME)
+        }
+
+    # Template-based fallback generator
     company = lead['company']
     name = lead['contact_name']
     designation = lead['designation']
@@ -93,4 +192,7 @@ def generate_outreach(req: OutreachRequest):
         "tone": req.tone,
         "subject": subject,
         "message": body,
+        "ai_generated": False,
+        "model": "rule-template"
     }
+

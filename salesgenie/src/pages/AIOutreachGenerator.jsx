@@ -97,12 +97,18 @@ export default function AIOutreachGenerator({
           {generatedOutreach ? (
             <div className="space-y-3">
               <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-                <div className="flex items-center gap-2 text-xs font-bold">
+                <div className="flex items-center gap-2 text-xs font-bold flex-wrap">
                   <FileText className="h-4 w-4 text-indigo-500" />
                   <span className="text-slate-600">Generated:</span>
                   <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded text-[10px]">{generatedOutreach.channel}</span>
                   <span className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded text-[10px]">{generatedOutreach.tone}</span>
+                  {generatedOutreach.ai_generated && (
+                    <span className="bg-emerald-50 text-emerald-700 border border-emerald-200/80 px-2 py-0.5 rounded text-[9.5px] font-extrabold flex items-center gap-1">
+                      <Sparkles className="h-3 w-3 text-emerald-500" /> NVIDIA GLM-5.2
+                    </span>
+                  )}
                 </div>
+
                 <button
                   onClick={() => onCopy?.(generatedOutreach.message)}
                   className="flex items-center gap-1 text-[10px] font-bold text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded transition-colors"
