@@ -5,6 +5,7 @@ export function useOutreach({ showToast }) {
   const [outreachLeadId, setOutreachLeadId] = useState("");
   const [outreachChannel, setOutreachChannel] = useState("Email");
   const [outreachTone, setOutreachTone] = useState("Persuasive");
+  const [senderName, setSenderName] = useState("");
   const [generatedOutreach, setGeneratedOutreach] = useState(null);
   const [generatingOutreach, setGeneratingOutreach] = useState(false);
 
@@ -18,7 +19,8 @@ export function useOutreach({ showToast }) {
         body: JSON.stringify({
           lead_id: parseInt(outreachLeadId),
           channel: outreachChannel,
-          tone: outreachTone
+          tone: outreachTone,
+          sender_name: senderName || undefined
         })
       });
       if (!res.ok) throw new Error("Failed to generate outreach");
@@ -31,7 +33,7 @@ export function useOutreach({ showToast }) {
     } finally {
       setGeneratingOutreach(false);
     }
-  }, [outreachLeadId, outreachChannel, outreachTone, showToast]);
+  }, [outreachLeadId, outreachChannel, outreachTone, senderName, showToast]);
 
   const copyToClipboard = useCallback((text) => {
     navigator.clipboard.writeText(text);
@@ -42,6 +44,7 @@ export function useOutreach({ showToast }) {
     outreachLeadId, setOutreachLeadId,
     outreachChannel, setOutreachChannel,
     outreachTone, setOutreachTone,
+    senderName, setSenderName,
     generatedOutreach, setGeneratedOutreach,
     generatingOutreach,
     handleGenerateOutreach,

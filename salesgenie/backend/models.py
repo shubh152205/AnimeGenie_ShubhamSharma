@@ -31,6 +31,8 @@ class OutreachRequest(BaseModel):
     lead_id: int
     channel: str
     tone: str
+    sender_name: Optional[str] = None
+
 
 
 class ConversationTranscriptRequest(BaseModel):

@@ -121,6 +121,7 @@ export default function App() {
               outreachLeadId={outreachLeadId} setOutreachLeadId={setOutreachLeadId}
               outreachChannel={outreachChannel} setOutreachChannel={setOutreachChannel}
               outreachTone={outreachTone} setOutreachTone={setOutreachTone}
+              senderName={senderName} setSenderName={setSenderName}
               generatedOutreach={generatedOutreach}
               generatingOutreach={generatingOutreach}
               onGenerate={handleGenerateOutreach}
