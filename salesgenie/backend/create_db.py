@@ -48,6 +48,28 @@ CREATE TABLE IF NOT EXISTS activities(
 )
 """)
 
+# Create users table for JWT authentication
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS users(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    role TEXT DEFAULT 'Sales Rep',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+""")
+
+# Seed default admin user (password: admin123)
+from hashlib import pbkdf2_hmac
+default_salt = b"salesgenie_salt_2026"
+default_pwd_hash = pbkdf2_hmac("sha256", "admin123".encode("utf-8"), default_salt, 100000).hex()
+cursor.execute(
+    "INSERT OR IGNORE INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)",
+    ("admin", "admin@salesgenie.ai", default_pwd_hash, "Administrator")
+)
+
+
 mock_leads = [
     (
         "TechCorp Solutions", "John Doe", "IT Director", "john.doe@techcorp.com", "+1-555-0101",

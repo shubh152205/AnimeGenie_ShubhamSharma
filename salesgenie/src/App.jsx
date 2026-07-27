@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Toast from './components/Toast';
 import Sidebar from './components/Sidebar';
 import MobileTopBar from './components/MobileTopBar';
+import AuthModal from './components/AuthModal';
 import LeadsExplorer from './pages/LeadsExplorer';
 import DealPipeline from './pages/DealPipeline';
 import AIOutreachGenerator from './pages/AIOutreachGenerator';
@@ -12,12 +13,25 @@ import { useLeadDetail } from './hooks/useLeadDetail';
 import { useAnalytics } from './hooks/useAnalytics';
 import { useOutreach } from './hooks/useOutreach';
 import { useLeadActions } from './hooks/useLeadActions';
+import { useAuth } from './hooks/useAuth';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("Leads Explorer");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const { toast, showToast } = useToast();
+  const {
+    user,
+    isAuthModalOpen,
+    setIsAuthModalOpen,
+    authMode,
+    setAuthMode,
+    loading: authLoading,
+    handleLogin,
+    handleRegister,
+    handleLogout
+  } = useAuth({ showToast });
+
 
   // Leads list state & fetch
   const [searchQuery, setSearchQuery] = useState("");
@@ -71,13 +85,32 @@ export default function App() {
       
       <Toast message={toast?.message} />
 
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        authMode={authMode}
+        setAuthMode={setAuthMode}
+        onLogin={handleLogin}
+        onRegister={handleRegister}
+        loading={authLoading}
+      />
+
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* Sidebar */}
-      <Sidebar activeTab={activeTab} onTabChange={handleTabChange} sidebarOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        sidebarOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        user={user}
+        onOpenAuth={() => setIsAuthModalOpen(true)}
+        onLogout={handleLogout}
+      />
+
 
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">

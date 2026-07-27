@@ -1,4 +1,4 @@
-import { Sparkles, Search, Layers3, Send, LayoutDashboard, Settings } from 'lucide-react';
+import { Sparkles, Search, Layers3, Send, LayoutDashboard, Lock, LogOut, ShieldCheck } from 'lucide-react';
 import { OUR_PRODUCT_STACK } from '../constants';
 
 const navItems = [
@@ -8,7 +8,7 @@ const navItems = [
   { name: "Analytics Dashboard", label: "Sales Analytics", icon: LayoutDashboard }
 ];
 
-export default function Sidebar({ activeTab, onTabChange, sidebarOpen, onClose }) {
+export default function Sidebar({ activeTab, onTabChange, sidebarOpen, onClose, user, onOpenAuth, onLogout }) {
   return (
     <aside className={`fixed lg:relative z-40 flex flex-col justify-between border-r border-slate-800 bg-[#0f172a] text-slate-300 transition-transform duration-300 h-full ${
       sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
@@ -53,7 +53,7 @@ export default function Sidebar({ activeTab, onTabChange, sidebarOpen, onClose }
 
       {/* Footer */}
       <div className="border-t border-slate-800 p-4">
-        <div className="flex flex-col gap-2 rounded-lg bg-slate-800/40 p-3">
+        <div className="flex flex-col gap-2 rounded-lg bg-slate-800/40 p-3 mb-3">
           <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wide">Our Target Product Stack</span>
           <div className="flex flex-wrap gap-1 mt-1">
             {OUR_PRODUCT_STACK.map(tech => (
@@ -61,17 +61,42 @@ export default function Sidebar({ activeTab, onTabChange, sidebarOpen, onClose }
             ))}
           </div>
         </div>
-        <div className="flex items-center gap-3 rounded-lg p-2 mt-3 hover:bg-slate-800/40">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400 font-semibold text-sm">
-            SR
+
+        {user ? (
+          <div className="flex items-center justify-between rounded-xl bg-slate-800/50 p-2.5 border border-indigo-500/20">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold text-xs shadow-md">
+                {user.username.substring(0, 2).toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-white truncate flex items-center gap-1">
+                  {user.username}
+                  <ShieldCheck className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                </p>
+                <span className="text-[10px] text-emerald-400 bg-emerald-950/50 px-1 py-0.2 rounded border border-emerald-800/40 font-mono">
+                  JWT Auth
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={onLogout}
+              title="Sign Out"
+              className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-white truncate">Sales Representative</p>
-            <p className="text-[10px] text-slate-500 truncate">Lead Management Center</p>
-          </div>
-          <Settings className="h-4.5 w-4.5 text-slate-500 hover:text-slate-300 cursor-pointer" />
-        </div>
+        ) : (
+          <button
+            onClick={onOpenAuth}
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 rounded-xl text-xs font-semibold transition-all"
+          >
+            <Lock className="w-3.5 h-3.5" />
+            <span>JWT Sign In / Register</span>
+          </button>
+        )}
       </div>
     </aside>
   );
 }
+
