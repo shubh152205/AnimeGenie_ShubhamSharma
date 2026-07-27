@@ -12,6 +12,7 @@ from routers.leads import router as leads_router
 from routers.analytics import router as analytics_router
 from routers.outreach import router as outreach_router
 from routers.auth import router as auth_router
+from routers.crm import router as crm_router
 
 app = FastAPI(
     title="SalesGenie AI - Lead Intelligence API Backend",
@@ -36,6 +37,8 @@ app.include_router(leads_router)
 app.include_router(analytics_router)
 app.include_router(outreach_router)
 app.include_router(auth_router)
+app.include_router(crm_router)
+
 
 
 
