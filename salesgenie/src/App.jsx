@@ -48,9 +48,11 @@ export default function App() {
     outreachLeadId, setOutreachLeadId,
     outreachChannel, setOutreachChannel,
     outreachTone, setOutreachTone,
+    senderName, setSenderName,
     generatedOutreach, generatingOutreach,
     handleGenerateOutreach, copyToClipboard
   } = useOutreach({ showToast });
+
 
   // Sync outreach lead selection
   useEffect(() => {

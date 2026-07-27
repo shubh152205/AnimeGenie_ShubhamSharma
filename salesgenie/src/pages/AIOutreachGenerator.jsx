@@ -3,13 +3,14 @@ import { Sparkles, Copy, RefreshCw, FileText, Mail, Phone, User } from 'lucide-r
 import { OUTREACH_CHANNELS } from '../constants';
 
 export default function AIOutreachGenerator({
-  leads, outreachLeadId, setOutreachLeadId,
-  outreachChannel, setOutreachChannel,
-  outreachTone, setOutreachTone,
-  senderName, setSenderName,
+  leads = [], outreachLeadId = "", setOutreachLeadId,
+  outreachChannel = "Email", setOutreachChannel,
+  outreachTone = "Persuasive", setOutreachTone,
+  senderName = "", setSenderName,
   generatedOutreach, generatingOutreach,
   onGenerate, onCopy
 }) {
+
   const [typedMessage, setTypedMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
 
@@ -81,9 +82,10 @@ export default function AIOutreachGenerator({
               onChange={(e) => setOutreachLeadId(e.target.value)}
               className="w-full rounded-lg border border-slate-200 p-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500"
             >
-              {leads.map(lead => (
+              {(leads || []).map(lead => (
                 <option key={lead.id} value={lead.id}>{lead.company} ({lead.contact_name})</option>
               ))}
+
             </select>
           </div>
 
