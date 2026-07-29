@@ -7,8 +7,6 @@ httpx
 openai
 pyjwt
 passlib
-
-
 textblob
 sqlalchemy
 requests
