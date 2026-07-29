@@ -4,11 +4,13 @@ Implements CRM endpoints, meeting summarization, conversation insights extractio
 and external CRM integration endpoints specified in Milestone 3.
 """
 
-from fastapi import APIRouter, HTTPException, Body
+from fastapi import APIRouter, HTTPException, Body, UploadFile, File
 from typing import Dict, Any, Optional
 from datetime import datetime
+import os
+import shutil
 
-from ml_engine import analyze_conversation_transcript
+from ml_engine import analyze_conversation_transcript, transcribe_audio
 from database import fetchall, fetchone, execute
 
 router = APIRouter(tags=["CRM Integration & Conversation Intelligence"])
@@ -103,3 +105,33 @@ def get_insights(data: Optional[Dict[str, Any]] = Body(None)):
         "next_meeting": "2026-08-01",
         "competitors_mentioned": ["Salesforce", "HubSpot"]
     }
+
+@router.post("/upload-audio")
+async def upload_and_analyze_audio(file: UploadFile = File(...)):
+    """Accepts a sales call audio file, transcribes it via Whisper, and analyzes it."""
+    # 1. Save uploaded file temporarily
+    temp_file_path = f"/tmp/{file.filename}"
+    with open(temp_file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    
+    try:
+        # 2. Transcribe Audio (Speech-to-Text)
+        transcript = transcribe_audio(temp_file_path)
+        
+        # 3. Analyze Transcript (LLM Analysis)
+        analysis = analyze_conversation_transcript(transcript)
+        
+        # Return full payload for the Dashboard
+        return {
+            "filename": file.filename,
+            "transcript": transcript,
+            "summary": " ".join(analysis.get("key_takeaways", [])),
+            "action_items": analysis.get("action_items", []),
+            "sentiment": analysis.get("sentiment", "Neutral"),
+            "interest": analysis.get("interest_level", "Medium"),
+            "budget": analysis.get("budget_mention", "Not discussed")
+        }
+    finally:
+        # Clean up temp file
+        if os.path.exists(temp_file_path):
+            os.remove(temp_file_path)

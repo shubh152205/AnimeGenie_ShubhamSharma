@@ -9,3 +9,6 @@ pyjwt
 passlib
 
 
+textblob
+sqlalchemy
+requests

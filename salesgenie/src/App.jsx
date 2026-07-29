@@ -7,6 +7,7 @@ import LeadsExplorer from './pages/LeadsExplorer';
 import DealPipeline from './pages/DealPipeline';
 import AIOutreachGenerator from './pages/AIOutreachGenerator';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
+import CallIntelligence from './pages/CallIntelligence';
 import { useToast } from './hooks/useToast';
 import { useLeads } from './hooks/useLeads';
 import { useLeadDetail } from './hooks/useLeadDetail';
@@ -147,6 +148,11 @@ export default function App() {
               onTabChange={handleTabChange}
               onSelectLead={setSelectedLeadId}
             />
+          )}
+
+          {/* Tab 3: Call Intelligence */}
+          {activeTab === "Call Intelligence" && (
+            <CallIntelligence showToast={showToast} />
           )}
 
           {/* Tab 3: AI Outreach Generator */}

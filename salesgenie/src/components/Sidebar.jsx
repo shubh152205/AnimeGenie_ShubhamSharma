@@ -1,9 +1,10 @@
-import { Sparkles, Search, Layers3, Send, LayoutDashboard, Lock, LogOut, ShieldCheck } from 'lucide-react';
+import { Sparkles, Search, Layers3, Send, LayoutDashboard, Lock, LogOut, ShieldCheck, Mic } from 'lucide-react';
 import { OUR_PRODUCT_STACK } from '../constants';
 
 const navItems = [
   { name: "Leads Explorer", label: "Leads Database", icon: Search },
   { name: "Deal Pipeline", label: "Sales Pipeline", icon: Layers3 },
+  { name: "Call Intelligence", label: "Call Intelligence", icon: Mic },
   { name: "AI Outreach Generator", label: "AI Outreach Writer", icon: Send },
   { name: "Analytics Dashboard", label: "Sales Analytics", icon: LayoutDashboard }
 ];
