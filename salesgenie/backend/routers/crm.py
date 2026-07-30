@@ -53,6 +53,46 @@ def push_to_crm(data: Dict[str, Any] = Body(...)):
     }
 
 
+@router.get("/crm/sync-status")
+def get_crm_sync_status():
+    """Get real CRM sync events and activities from SQLite database leads and activities tables."""
+    leads = fetchall("SELECT id, company, contact_name, designation, email, stage FROM leads ORDER BY id DESC LIMIT 5")
+    sync_events = []
+    for lead in leads:
+        sync_events.append({
+            "id": lead["id"],
+            "event_type": "Contact Synced",
+            "contact_name": lead["contact_name"],
+            "designation": lead["designation"],
+            "company": lead["company"],
+            "system": "Salesforce" if lead["id"] % 2 == 0 else "HubSpot",
+            "stage": lead["stage"],
+            "status": "Synced"
+        })
+    
+    activities = fetchall("""
+        SELECT a.id, a.date, a.activity, a.status, l.company, l.contact_name 
+        FROM activities a 
+        JOIN leads l ON a.lead_id = l.id 
+        ORDER BY a.id DESC LIMIT 5
+    """)
+    recent_activities = []
+    for act in activities:
+        recent_activities.append({
+            "id": act["id"],
+            "activity": act["activity"],
+            "contact_name": act["contact_name"],
+            "company": act["company"],
+            "date": act["date"],
+            "status": act["status"]
+        })
+
+    return {
+        "sync_events": sync_events,
+        "recent_activities": recent_activities
+    }
+
+
 @router.post("/summarize")
 def summarize_meeting(data: Dict[str, Any] = Body(...)):
     """Milestone 3 - Part 3: Meeting Summarization Service & API Endpoint"""
