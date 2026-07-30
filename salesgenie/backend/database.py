@@ -54,6 +54,31 @@ def init_db():
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
+    # Seed default leads if table is empty
+    cursor.execute("SELECT COUNT(*) FROM leads")
+    count = cursor.fetchone()[0]
+    if count == 0:
+        mock_leads = [
+            ("TechCorp Solutions", "John Doe", "IT Director", "john.doe@techcorp.com", "+1-555-0101", "Technology", 520, "$45M", "San Francisco", "Series B", "React, Node.js, AWS, PostgreSQL", 85, "Negotiation", 8, 14, 1, 0, "Legacy infrastructure scaling issues and high cloud hosting costs."),
+            ("MediLife Care", "Priya Sharma", "IT Director", "priya.sharma@medilifecare.com", "+1-555-0102", "Healthcare", 1200, "$110M", "Boston", "Series C", "Angular, Spring Boot, Oracle, GCP", 78, "Proposal Sent", 5, 9, 1, 0, "Patient data privacy compliance and legacy EHR integration."),
+            ("EduSmart Academy", "Sarah Jenkins", "CTO", "sarah.j@edusmart.edu", "+1-555-0103", "Education", 80, "$5M", "Austin", "Seed", "PHP, Laravel, MySQL, Heroku", 42, "Lead", 2, 3, 0, 0, "Student portal latency and lack of mobile app integration."),
+            ("SecureBank Corp", "Robert Chen", "VP Information Security", "r.chen@securebank.com", "+1-555-0104", "Finance", 4500, "$380M", "New York", "Late Stage", "React, C#, .NET Core, Azure, MSSQL", 92, "Closed Won", 15, 28, 1, 1, "Real-time fraud detection speed and security compliance audits."),
+            ("HealthCare Plus", "Emily Davis", "VP Procurement", "emily.davis@healthcareplus.org", "+1-555-0105", "Healthcare", 650, "$55M", "Chicago", "Series A", "Vue, Python, Django, AWS, PostgreSQL", 64, "Contacted", 4, 6, 0, 0, "Inefficient patient scheduling systems and long response times.")
+        ]
+        cursor.executemany("""
+        INSERT INTO leads (company, contact_name, designation, email, phone, industry, employees, revenue, location, funding, technology, score, stage, email_opens, website_visits, demo_request, converted, pain_point)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, mock_leads)
+
+    # Seed default admin user (password: admin123)
+    from hashlib import pbkdf2_hmac
+    default_salt = b"salesgenie_salt_2026"
+    default_pwd_hash = pbkdf2_hmac("sha256", "admin123".encode("utf-8"), default_salt, 100000).hex()
+    cursor.execute(
+        "INSERT OR IGNORE INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)",
+        ("admin", "admin@salesgenie.ai", default_pwd_hash, "Administrator")
+    )
+
     conn.commit()
     conn.close()
 
