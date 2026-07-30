@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
-  Upload, CheckCircle2, Clock, Mail, PhoneCall, 
-  Calendar, FileText, Sparkles, Building2, User, RefreshCw, 
-  Mic, MicOff, AlertCircle
+  Upload, CheckCircle2, FileText, Sparkles, User, 
+  Mic, MicOff, Settings2, Activity
 } from 'lucide-react';
 import { API_BASE } from '../constants';
 
@@ -19,44 +18,9 @@ export default function CallIntelligence({ showToast }) {
   const audioChunksRef = useRef([]);
   const recognitionRef = useRef(null);
 
-  // Real Database Data State
-  const [syncEvents, setSyncEvents] = useState([]);
-  const [recentActivities, setRecentActivities] = useState([]);
-  const [isLoadingData, setIsLoadingData] = useState(true);
-
   // Conversation Insights State
-  const [discussionPoints, setDiscussionPoints] = useState([
-    "Data processing bottlenecks affecting customer experience",
-    "Need for real-time analytics and reporting capabilities",
-    "Budget approved for technology infrastructure upgrade",
-    "Competitive evaluation in progress"
-  ]);
-
-  const [actionItems, setActionItems] = useState([
-    { assignee: "Alex Thompson", due: "Immediate", task: "Send technical architecture document and integration guide" },
-    { assignee: "Sarah Johnson", due: "Tomorrow", task: "Schedule technical deep-dive with engineering team" }
-  ]);
-
-  // Fetch real sync events and activities from database on load
-  const fetchCrmSyncData = async () => {
-    setIsLoadingData(true);
-    try {
-      const res = await fetch(`${API_BASE}/crm/sync-status`);
-      if (res.ok) {
-        const data = await res.json();
-        setSyncEvents(data.sync_events || []);
-        setRecentActivities(data.recent_activities || []);
-      }
-    } catch (err) {
-      console.error("Failed to load CRM sync status from backend DB:", err);
-    } finally {
-      setIsLoadingData(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCrmSyncData();
-  }, []);
+  const [discussionPoints, setDiscussionPoints] = useState([]);
+  const [actionItems, setActionItems] = useState([]);
 
   // Audio File Selection Handler
   const handleFileChange = (e) => {
@@ -90,13 +54,12 @@ export default function CallIntelligence({ showToast }) {
       }
       if (data.action_items && data.action_items.length > 0) {
         setActionItems(data.action_items.map((item, idx) => ({
-          assignee: idx % 2 === 0 ? "Alex Thompson" : "Sarah Johnson",
+          assignee: idx % 2 === 0 ? "Sales Rep" : "Technical Lead",
           due: "Follow-up",
           task: item
         })));
       }
       showToast?.("Sales call recording analyzed successfully!", "success");
-      fetchCrmSyncData(); // Refresh CRM sync events after processing
     } catch (err) {
       console.error(err);
       showToast?.("Processing completed with fallback transcript.", "info");
@@ -149,6 +112,7 @@ export default function CallIntelligence({ showToast }) {
         mediaRecorder.start(1000);
         setIsRecording(true);
         setLiveTranscript('');
+        setRecordingResult(null); // Clear previous results
 
         // Web Speech API Fallback for instant live text display
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -179,20 +143,21 @@ export default function CallIntelligence({ showToast }) {
 
   return (
     <div className="flex-1 bg-slate-50/70 overflow-y-auto p-4 md:p-6 font-sans">
-      <div className="max-w-7xl mx-auto space-y-5">
+      <div className="max-w-7xl mx-auto space-y-6">
         
         {/* Top Header Controls */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
           <div>
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-              Conversation Intelligence & CRM Integration
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-indigo-600" />
+              Call Intelligence & Transcription
             </h1>
             <p className="text-xs text-slate-500 font-medium mt-0.5">
-              Record sales calls, extract AI meeting summaries, and auto-sync contacts & activities with CRM
+              Record sales calls, process speech-to-text, and extract AI meeting summaries
             </p>
           </div>
 
-          {/* Audio Controls (Live Mic + File Upload) */}
+          {/* Audio Controls */}
           <div className="flex flex-wrap items-center gap-2.5">
             <input 
               type="file" 
@@ -240,172 +205,144 @@ export default function CallIntelligence({ showToast }) {
                   : "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200"
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>{isProcessing ? "Processing..." : "Process AI Call"}</span>
+              <Settings2 className={`w-3.5 h-3.5 ${isProcessing ? "animate-spin" : ""}`} />
+              <span>{isProcessing ? "Processing Audio..." : "Process Call"}</span>
             </button>
           </div>
         </div>
 
-        {/* Live Recording Speech-to-Text Banner */}
-        {isRecording && (
-          <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-xs font-bold text-rose-800">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-ping"></span>
-                Live Audio Recording in Progress...
-              </span>
-              <span className="text-[11px] font-semibold text-rose-600">Speak into microphone</span>
-            </div>
-            {liveTranscript && (
-              <p className="text-xs font-mono text-slate-800 bg-white p-2.5 rounded-lg border border-rose-100">
-                "{liveTranscript}"
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* Main 3-Column Interface Window */}
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+        {/* 2-Column Interface: Transcript vs Insights */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
-          <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-100 min-h-[520px]">
-            
-            {/* 1. Left Column: CRM Sync Status (REAL DB LEADS) */}
-            <div className="lg:col-span-3 p-5 space-y-4 bg-slate-50/30">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">CRM Sync Status</h3>
-                <button onClick={fetchCrmSyncData} className="text-slate-400 hover:text-indigo-600 transition-colors">
-                  <RefreshCw className={`w-3.5 h-3.5 ${isLoadingData ? "animate-spin" : ""}`} />
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                {syncEvents.length === 0 ? (
-                  <p className="text-xs text-slate-400 font-medium text-center py-4">No sync events found</p>
-                ) : (
-                  syncEvents.map((evt) => (
-                    <div key={evt.id} className="bg-white border border-slate-200/80 rounded-xl p-3.5 shadow-2xs hover:border-slate-300 transition-colors">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-bold text-slate-800">{evt.event_type}</span>
-                        <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">{evt.stage}</span>
-                      </div>
-                      <p className="text-xs font-semibold text-slate-700 leading-snug">
-                        {evt.contact_name} ({evt.designation})
-                      </p>
-                      <p className="text-[11px] text-slate-500 font-medium">
-                        {evt.company}
-                      </p>
-                      <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-slate-100 text-[10px] text-slate-400 font-medium">
-                        <span>System: {evt.system}</span>
-                        <span className="text-emerald-600 font-bold">Synced DB</span>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            {/* 2. Middle Column: Meeting Summary & AI Insights */}
-            <div className="lg:col-span-6 p-6 space-y-6">
-              
-              {/* Header */}
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                <h2 className="text-base font-bold text-slate-900">Meeting Summary & AI Insights</h2>
-                <span className="inline-flex items-center gap-1 text-xs font-bold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-full border border-purple-100">
-                  <Sparkles className="w-3.5 h-3.5 text-purple-600" /> GLM-4.5 & Whisper Engine
+          {/* Left Column: Transcription & Data Processing */}
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-xs flex flex-col h-full min-h-[500px]">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Activity className="w-4 h-4 text-indigo-600" />
+                Speech-to-Text Transcription
+              </h2>
+              {isRecording && (
+                <span className="flex items-center gap-2 text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded-full">
+                  <span className="w-2 h-2 rounded-full bg-rose-600 animate-ping"></span>
+                  Listening...
                 </span>
-              </div>
-
-              {/* Speaker Metadata */}
-              <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                <div className="flex items-center gap-1.5 text-slate-800">
-                  <User className="w-4 h-4 text-indigo-600" />
-                  <span>{syncEvents[0]?.contact_name || "John Doe"}, {syncEvents[0]?.designation || "IT Director"}</span>
+              )}
+            </div>
+            
+            <div className="p-5 flex-1 bg-slate-50/50">
+              {isRecording ? (
+                <div className="h-full flex flex-col">
+                  <p className="text-xs font-semibold text-slate-500 mb-2">Live Transcript:</p>
+                  <div className="flex-1 bg-white border border-slate-200 rounded-xl p-4 text-sm text-slate-700 leading-relaxed overflow-y-auto">
+                    {liveTranscript || "Start speaking..."}
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Building2 className="w-4 h-4 text-slate-400" />
-                  <span>{syncEvents[0]?.company || "TechCorp Solutions"}</span>
-                </div>
-              </div>
-
-              {/* Key Discussion Points */}
-              <div className="space-y-3">
-                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-indigo-600" />
-                  Key Takeaways
-                </h4>
-                <ul className="space-y-2.5 pl-1">
-                  {discussionPoints.map((point, index) => (
-                    <li key={index} className="flex items-start gap-3 text-xs font-semibold text-slate-700">
-                      <span className="w-2 h-2 rounded-full bg-indigo-600 mt-1.5 shrink-0"></span>
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Action Items */}
-              <div className="space-y-3 pt-2">
-                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-indigo-600" />
-                  Action Items
-                </h4>
-
-                <div className="space-y-2.5">
-                  {actionItems.map((item, idx) => (
-                    <div key={idx} className="bg-amber-50/60 border border-amber-200/70 rounded-xl p-3.5">
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-xs font-bold text-slate-800">{item.assignee}</span>
-                        <span className="text-[10px] font-bold text-amber-700">Due: {item.due}</span>
-                      </div>
-                      <p className="text-xs font-semibold text-slate-700 leading-normal">
-                        {item.task}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Speech-to-Text Transcript Display */}
-              {recordingResult?.transcript && (
-                <div className="pt-4 border-t border-slate-100">
-                  <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
-                    Speech-to-Text Transcript (Whisper Engine)
-                  </h4>
-                  <div className="bg-slate-900 text-slate-200 text-xs p-3.5 rounded-xl font-mono max-h-32 overflow-y-auto">
+              ) : recordingResult?.transcript ? (
+                <div className="h-full flex flex-col">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-semibold text-slate-500">Processed Transcript (Whisper Engine):</p>
+                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
+                      Processed Successfully
+                    </span>
+                  </div>
+                  <div className="flex-1 bg-white border border-slate-200 rounded-xl p-4 text-sm text-slate-800 leading-relaxed overflow-y-auto font-medium">
                     {recordingResult.transcript}
                   </div>
                 </div>
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center text-slate-400 space-y-3">
+                  <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center">
+                    <Mic className="w-6 h-6 text-slate-300" />
+                  </div>
+                  <p className="text-sm font-medium">No transcript available.</p>
+                  <p className="text-xs text-center max-w-xs">Record a call or upload an audio file to view the speech-to-text transcript here.</p>
+                </div>
               )}
-
             </div>
-
-            {/* 3. Right Column: Recent Activity (REAL DB ACTIVITIES) */}
-            <div className="lg:col-span-3 p-5 space-y-4 bg-slate-50/30">
-              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">
-                Recent Database Activity
-              </h3>
-
-              <div className="space-y-4 relative before:absolute before:inset-0 before:left-3 before:w-0.5 before:bg-slate-200/70">
-                {recentActivities.length === 0 ? (
-                  <p className="text-xs text-slate-400 font-medium pl-7 py-2">No activity records logged</p>
-                ) : (
-                  recentActivities.map((act) => (
-                    <div key={act.id} className="relative pl-7 space-y-0.5">
-                      <div className="absolute left-0 top-0.5 w-6 h-6 rounded-full bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600">
-                        <PhoneCall className="w-3 h-3" />
-                      </div>
-                      <p className="text-xs font-bold text-slate-800 leading-tight">{act.activity}</p>
-                      <p className="text-[11px] font-semibold text-slate-600 leading-tight">{act.contact_name} ({act.company})</p>
-                      <p className="text-[10px] text-slate-400 font-medium">{act.date} • {act.status}</p>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
           </div>
-        </div>
 
+          {/* Right Column: AI Insights & Summarization */}
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-xs flex flex-col h-full min-h-[500px]">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-purple-600" />
+                AI Conversation Insights
+              </h2>
+              <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded-full border border-purple-100">
+                Powered by GLM-4.5
+              </span>
+            </div>
+
+            <div className="p-5 space-y-6 flex-1 overflow-y-auto">
+              {!recordingResult ? (
+                <div className="h-full flex flex-col items-center justify-center text-slate-400 space-y-3 py-12">
+                  <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center">
+                    <Sparkles className="w-6 h-6 text-slate-300" />
+                  </div>
+                  <p className="text-sm font-medium">Insights pending processing.</p>
+                  <p className="text-xs text-center max-w-xs">AI will analyze the transcript and generate summaries and action items here.</p>
+                </div>
+              ) : (
+                <>
+                  {/* Speaker Details */}
+                  <div className="flex items-center gap-3 bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs font-semibold text-slate-700">
+                    <User className="w-4 h-4 text-indigo-600" />
+                    <span>Analyzed Call Metadata</span>
+                  </div>
+
+                  {/* Key Takeaways */}
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-indigo-600" />
+                      Meeting Summary / Takeaways
+                    </h4>
+                    {discussionPoints.length > 0 ? (
+                      <ul className="space-y-2.5 pl-1">
+                        {discussionPoints.map((point, index) => (
+                          <li key={index} className="flex items-start gap-3 text-xs font-semibold text-slate-700">
+                            <span className="w-2 h-2 rounded-full bg-indigo-600 mt-1.5 shrink-0"></span>
+                            <span className="leading-relaxed">{point}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-xs text-slate-500 italic">No summary points extracted.</p>
+                    )}
+                  </div>
+
+                  {/* Action Items */}
+                  <div className="space-y-3 pt-4 border-t border-slate-100">
+                    <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      Extracted Action Items
+                    </h4>
+                    
+                    {actionItems.length > 0 ? (
+                      <div className="space-y-3">
+                        {actionItems.map((item, idx) => (
+                          <div key={idx} className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3.5">
+                            <div className="flex items-center justify-between mb-1.5">
+                              <span className="text-xs font-bold text-slate-800">{item.assignee}</span>
+                              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/50 px-2 py-0.5 rounded">
+                                {item.due}
+                              </span>
+                            </div>
+                            <p className="text-xs font-semibold text-slate-700 leading-normal">
+                              {item.task}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-500 italic">No action items identified.</p>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   );
