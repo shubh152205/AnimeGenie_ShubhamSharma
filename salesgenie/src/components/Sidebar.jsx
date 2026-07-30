@@ -5,6 +5,7 @@ const navItems = [
   { name: "Leads Explorer", label: "Leads Database", icon: Search },
   { name: "Deal Pipeline", label: "Sales Pipeline", icon: Layers3 },
   { name: "Call Intelligence", label: "Call Intelligence", icon: Mic },
+  { name: "CRM Integration", label: "CRM Info & Integration", icon: ShieldCheck },
   { name: "AI Outreach Generator", label: "AI Outreach Writer", icon: Send },
   { name: "Analytics Dashboard", label: "Sales Analytics", icon: LayoutDashboard }
 ];
