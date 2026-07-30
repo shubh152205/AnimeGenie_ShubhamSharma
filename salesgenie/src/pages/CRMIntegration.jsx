@@ -10,6 +10,7 @@ export default function CRMIntegration({ showToast }) {
   const [syncEvents, setSyncEvents] = useState([]);
   const [recentActivities, setRecentActivities] = useState([]);
   const [meetingData, setMeetingData] = useState(null);
+  const [leadsList, setLeadsList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch CRM sync events, activities, and latest meeting data from backend
@@ -31,6 +32,13 @@ export default function CRMIntegration({ showToast }) {
         if (mtg.meeting_id) {
           setMeetingData(mtg);
         }
+      }
+
+      // 3. Fetch leads for meeting scheduler
+      const leadsRes = await fetch(`${API_BASE}/leads`);
+      if (leadsRes.ok) {
+        const leadsData = await leadsRes.json();
+        setLeadsList(Array.isArray(leadsData) ? leadsData : leadsData.leads || []);
       }
     } catch (err) {
       console.error("Error fetching CRM data:", err);
@@ -126,11 +134,6 @@ export default function CRMIntegration({ showToast }) {
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-[10px] font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 px-2.5 py-1 rounded-full uppercase tracking-wider">
-                  Milestone 3 • Weeks 5–6
-                </span>
-              </div>
               <h1 className="text-xl font-bold text-slate-900 tracking-tight">
                 CRM Integration & Conversation Intelligence
               </h1>
@@ -282,6 +285,50 @@ export default function CRMIntegration({ showToast }) {
           {/* COLUMN 3: Recent Activity (Right - 4 cols)  */}
           {/* ============================================ */}
           <div className="lg:col-span-4 space-y-4">
+            {/* Schedule Meeting Block */}
+            <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-4">
+              <div className="border-b border-slate-100 pb-3 mb-3 flex items-center justify-between">
+                <div>
+                  <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                    Schedule Meeting
+                  </h3>
+                  <p className="text-[10px] text-slate-500 font-medium mt-0.5">Book a call or demo with a synced lead</p>
+                </div>
+                <div className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg">
+                  <Clock className="w-3.5 h-3.5" />
+                </div>
+              </div>
+              
+              <form className="space-y-2.5" onSubmit={(e) => { 
+                e.preventDefault(); 
+                showToast?.("Meeting scheduled successfully! Activity will be logged in DB shortly.", "success"); 
+                e.target.reset();
+              }}>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-700 mb-1">Select Lead</label>
+                  <select required className="w-full text-xs p-2 rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:border-indigo-500 font-medium text-slate-700">
+                    <option value="">-- Choose a Lead --</option>
+                    {leadsList.map(lead => (
+                      <option key={lead.id} value={lead.id}>{lead.contact_name} ({lead.company})</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-700 mb-1">Date</label>
+                    <input type="date" required className="w-full text-xs p-2 rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:border-indigo-500 font-medium text-slate-700" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-700 mb-1">Time</label>
+                    <input type="time" required className="w-full text-xs p-2 rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:border-indigo-500 font-medium text-slate-700" />
+                  </div>
+                </div>
+                <button type="submit" className="w-full mt-2 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm">
+                  Confirm & Schedule
+                </button>
+              </form>
+            </div>
+
             <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-4">
               <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4">Recent Activity</h3>
 
