@@ -3,7 +3,7 @@
 set -o errexit
 
 # Install Python dependencies
-pip install -r backend/requirements.txt
+pip install -r requirements.txt
 
 # Download and install a static build of ffmpeg for audio processing on Render
 echo "Downloading ffmpeg..."
