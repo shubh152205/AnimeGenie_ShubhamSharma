@@ -95,9 +95,21 @@ def get_next_action(score: int) -> str:
 # Random Forest Classifier (Conversion Prediction)
 # ---------------------------------------------------------------------------
 
+import pickle
+
 def retrain_ml_model():
-    """Train RandomForestClassifier from live CRM lead engagement logs."""
+    """Train or load RandomForestClassifier pre-trained on Kaggle Lead Scoring dataset."""
     global _ml_model
+
+    model_pkl_path = os.path.join(os.path.dirname(__file__), "lead_scoring_model.pkl")
+    if os.path.exists(model_pkl_path):
+        try:
+            with open(model_pkl_path, "rb") as f:
+                _ml_model = pickle.load(f)
+            print("Loaded Kaggle pre-trained Random Forest model lead_scoring_model.pkl successfully.")
+            return
+        except Exception as e:
+            print("Error loading lead_scoring_model.pkl:", e)
 
     rows = fetchall("SELECT email_opens, website_visits, demo_request, converted FROM leads")
     rows = [tuple(r) for r in rows]
