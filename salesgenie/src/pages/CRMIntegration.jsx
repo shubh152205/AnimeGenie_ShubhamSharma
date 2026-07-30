@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Database, RefreshCw, CheckCircle2, User, Mail, Clock, Send, 
   Sparkles, ExternalLink, MessageSquare, Phone, CalendarCheck, 
-  StickyNote, ArrowRight, Zap
+  StickyNote, ArrowRight, Zap, Calendar, Video
 } from 'lucide-react';
 import { API_BASE } from '../constants';
 
@@ -51,26 +51,8 @@ export default function CRMIntegration({ showToast }) {
     fetchCrmData();
   }, []);
 
-  // CRM Push handler
-  const handlePushToCrm = async (event) => {
-    try {
-      const res = await fetch(`${API_BASE}/crm/push`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          company: event.company,
-          contact_name: event.contact_name,
-          stage: event.stage,
-          timestamp: new Date().toISOString()
-        })
-      });
-      if (res.ok) {
-        showToast?.(`${event.company} synced to CRM successfully!`, "success");
-      }
-    } catch (err) {
-      showToast?.("CRM push completed.", "info");
-    }
-  };
+  // Filter scheduled meetings from activities
+  const scheduledMeetings = recentActivities.filter(act => act.status === 'Scheduled');
 
   // Helper: get icon for sync event type
   const getEventIcon = (type, idx) => {
@@ -130,7 +112,7 @@ export default function CRMIntegration({ showToast }) {
     <div className="flex-1 bg-slate-50/70 overflow-y-auto p-4 md:p-6 font-sans">
       <div className="max-w-7xl mx-auto space-y-5">
 
-        {/* Milestone badge + Header */}
+        {/* Header */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
@@ -152,249 +134,310 @@ export default function CRMIntegration({ showToast }) {
           </div>
         </div>
 
-        {/* 3-Column Layout matching PPT Slide 25 */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* Improved 3-Column Grid Layout for Perfect Alignment */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
           {/* ============================================ */}
-          {/* COLUMN 1: CRM Sync Status (Left - 3 cols)  */}
+          {/* BLOCK 1: CRM Sync Status                     */}
           {/* ============================================ */}
-          <div className="lg:col-span-3 space-y-4">
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">CRM Sync Status</h3>
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-                  <CheckCircle2 className="w-3 h-3" /> Synced
-                </span>
-              </div>
-
-              {/* Timeline of sync events */}
-              <div className="relative space-y-0 before:absolute before:left-[18px] before:top-4 before:bottom-4 before:w-0.5 before:bg-slate-200">
-                {isLoading ? (
-                  <p className="text-xs text-slate-400 font-medium py-6 text-center">Loading sync status...</p>
-                ) : crmSyncCards.length === 0 ? (
-                  <p className="text-xs text-slate-400 font-medium py-6 text-center">No sync events yet</p>
-                ) : (
-                  crmSyncCards.map((card, idx) => {
-                    const CardIcon = card.Icon;
-                    return (
-                      <div key={idx} className="relative pl-11 py-3">
-                        <div className={`absolute left-1 top-3 w-[26px] h-[26px] rounded-full ${card.bg} border ${card.border} flex items-center justify-center z-10`}>
-                          <CardIcon className={`w-3 h-3 ${card.color}`} />
-                        </div>
-                        <div className="flex items-center justify-between mb-0.5">
-                          <span className="text-xs font-bold text-slate-800">{card.description}</span>
-                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${card.badgeColor}`}>
-                            {card.badge}
-                          </span>
-                        </div>
-                        <p className="text-[11px] font-medium text-slate-600 leading-snug">{card.subtext}</p>
-                        <div className="flex items-center justify-between mt-1">
-                          <span className="text-[10px] text-slate-400 font-medium">{card.system}</span>
-                          <span className="text-[10px] text-slate-400 font-medium">{idx === 0 ? '2 min ago' : idx === 1 ? '15 min ago' : idx === 2 ? '1 hour ago' : 'Just now'}</span>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-5 flex flex-col h-full">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">CRM Sync Status</h3>
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                <CheckCircle2 className="w-3 h-3" /> Synced
+              </span>
             </div>
-          </div>
 
-          {/* ============================================ */}
-          {/* COLUMN 2: Meeting Summary (Center - 5 cols) */}
-          {/* ============================================ */}
-          <div className="lg:col-span-5">
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-5 min-h-[400px]">
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="text-sm font-bold text-slate-900">Meeting Summary</h3>
-                <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-full border border-purple-100">
-                  AI Powered
-                </span>
-              </div>
-
-              {meetingData ? (
-                <div className="space-y-5">
-                  {/* Speaker Info */}
-                  <div className="flex items-center gap-3 text-xs text-slate-600 font-medium">
-                    <span className="flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5 text-slate-400" />
-                      {syncEvents[0]?.contact_name || "Sales Call"}, {syncEvents[0]?.designation || "CTO"}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-slate-400" />
-                      45 min • Today
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Database className="w-3 h-3 text-slate-400" />
-                      {syncEvents[0]?.company || "TechCorp Solutions"}
-                    </span>
-                  </div>
-
-                  {/* Key Discussion Points */}
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-800 mb-3">📋 Key Discussion Points</h4>
-                    <ul className="space-y-2.5">
-                      {(meetingData.summary || "").split('. ').filter(Boolean).map((point, i) => (
-                        <li key={i} className="flex items-start gap-2.5 text-xs font-medium text-slate-700">
-                          <span className="w-2 h-2 rounded-full bg-indigo-500 mt-1.5 shrink-0"></span>
-                          <span className="leading-relaxed">{point.endsWith('.') ? point : point + '.'}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Action Items */}
-                  <div className="pt-3 border-t border-slate-100">
-                    <h4 className="text-xs font-bold text-slate-800 mb-3 flex items-center gap-2">
-                      📋 Action Items
-                    </h4>
-                    <div className="space-y-2.5">
-                      {(meetingData.action_items || []).length > 0 ? (
-                        meetingData.action_items.map((item, idx) => (
-                          <div key={idx} className="bg-amber-50/60 border border-amber-100 rounded-xl p-3 flex items-center justify-between">
-                            <div>
-                              <span className="text-xs font-bold text-slate-800 block">
-                                {idx % 2 === 0 ? 'Alex Thompson' : 'Sarah Johnson'}
-                              </span>
-                              <span className="text-[11px] font-medium text-slate-600">{item}</span>
-                            </div>
-                            <span className="text-[10px] font-bold text-rose-600 whitespace-nowrap">
-                              Due: {idx === 0 ? 'Aug 1' : `Aug ${idx + 2}`}
-                            </span>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-xs text-slate-400 italic">No action items extracted.</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
+            <div className="relative flex-1 space-y-0 before:absolute before:left-[18px] before:top-4 before:bottom-4 before:w-0.5 before:bg-slate-200">
+              {isLoading ? (
+                <p className="text-xs text-slate-400 font-medium py-6 text-center">Loading sync status...</p>
+              ) : crmSyncCards.length === 0 ? (
+                <p className="text-xs text-slate-400 font-medium py-6 text-center">No sync events yet</p>
               ) : (
-                <div className="flex flex-col items-center justify-center py-16 text-slate-400">
-                  <Sparkles className="w-10 h-10 text-slate-200 mb-3" />
-                  <p className="text-sm font-medium">No meeting analyzed yet.</p>
-                  <p className="text-xs text-center max-w-xs mt-1">
-                    Go to "Call Intelligence" to process a sales call. The summary will appear here automatically.
-                  </p>
-                </div>
+                crmSyncCards.map((card, idx) => {
+                  const CardIcon = card.Icon;
+                  return (
+                    <div key={idx} className="relative pl-12 py-3.5">
+                      <div className={`absolute left-1 top-3 w-8 h-8 rounded-full ${card.bg} border ${card.border} flex items-center justify-center z-10`}>
+                        <CardIcon className={`w-3.5 h-3.5 ${card.color}`} />
+                      </div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-bold text-slate-800">{card.description}</span>
+                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${card.badgeColor}`}>
+                          {card.badge}
+                        </span>
+                      </div>
+                      <p className="text-xs font-medium text-slate-600 leading-snug">{card.subtext}</p>
+                      <div className="flex items-center justify-between mt-1.5">
+                        <span className="text-[10px] text-slate-400 font-medium">{card.system}</span>
+                        <span className="text-[10px] text-slate-400 font-medium">{idx === 0 ? '2 min ago' : idx === 1 ? '15 min ago' : idx === 2 ? '1 hour ago' : 'Just now'}</span>
+                      </div>
+                    </div>
+                  );
+                })
               )}
             </div>
           </div>
 
           {/* ============================================ */}
-          {/* COLUMN 3: Recent Activity (Right - 4 cols)  */}
+          {/* BLOCK 2: Meeting Summary                     */}
           {/* ============================================ */}
-          <div className="lg:col-span-4 space-y-4">
-            {/* Schedule Meeting Block */}
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-4">
-              <div className="border-b border-slate-100 pb-3 mb-3 flex items-center justify-between">
-                <div>
-                  <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                    Schedule Meeting
-                  </h3>
-                  <p className="text-[10px] text-slate-500 font-medium mt-0.5">Book a call or demo with a synced lead</p>
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-5 flex flex-col h-full">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Meeting Summary</h3>
+              <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-full border border-purple-100">
+                AI Powered
+              </span>
+            </div>
+
+            {meetingData ? (
+              <div className="space-y-6 flex-1">
+                {/* Speaker Info */}
+                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 font-medium bg-slate-50 p-3 rounded-xl border border-slate-100">
+                  <span className="flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-indigo-500" />
+                    {syncEvents[0]?.contact_name || "Sales Call"}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Database className="w-3.5 h-3.5 text-emerald-500" />
+                    {syncEvents[0]?.company || "TechCorp"}
+                  </span>
                 </div>
-                <div className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg">
-                  <Clock className="w-3.5 h-3.5" />
-                </div>
-              </div>
-              
-              <form className="space-y-2.5" onSubmit={(e) => { 
-                e.preventDefault(); 
-                showToast?.("Meeting scheduled successfully! Activity will be logged in DB shortly.", "success"); 
-                e.target.reset();
-              }}>
+
+                {/* Key Discussion Points */}
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-700 mb-1">Select Lead</label>
-                  <select required className="w-full text-xs p-2 rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:border-indigo-500 font-medium text-slate-700">
-                    <option value="">-- Choose a Lead --</option>
-                    {leadsList.map(lead => (
-                      <option key={lead.id} value={lead.id}>{lead.contact_name} ({lead.company})</option>
+                  <h4 className="text-xs font-bold text-slate-800 mb-3 uppercase tracking-wider">📋 Key Discussion</h4>
+                  <ul className="space-y-3">
+                    {(meetingData.summary || "").split('. ').filter(Boolean).map((point, i) => (
+                      <li key={i} className="flex items-start gap-3 text-xs font-medium text-slate-700">
+                        <span className="w-2 h-2 rounded-full bg-indigo-500 mt-1 shrink-0"></span>
+                        <span className="leading-relaxed">{point.endsWith('.') ? point : point + '.'}</span>
+                      </li>
                     ))}
-                  </select>
+                  </ul>
                 </div>
-                <div className="grid grid-cols-2 gap-2.5">
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-700 mb-1">Date</label>
-                    <input type="date" required className="w-full text-xs p-2 rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:border-indigo-500 font-medium text-slate-700" />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-700 mb-1">Time</label>
-                    <input type="time" required className="w-full text-xs p-2 rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:border-indigo-500 font-medium text-slate-700" />
+
+                {/* Action Items */}
+                <div className="pt-4 border-t border-slate-100">
+                  <h4 className="text-xs font-bold text-slate-800 mb-3 uppercase tracking-wider">
+                    ⚡ Action Items
+                  </h4>
+                  <div className="space-y-3">
+                    {(meetingData.action_items || []).length > 0 ? (
+                      meetingData.action_items.map((item, idx) => (
+                        <div key={idx} className="bg-amber-50/60 border border-amber-100 rounded-xl p-3 flex items-center justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <span className="text-xs font-bold text-slate-800 block mb-0.5">
+                              {idx % 2 === 0 ? 'Alex Thompson' : 'Sarah Johnson'}
+                            </span>
+                            <span className="text-[11px] font-medium text-slate-600 leading-snug block truncate whitespace-normal">{item}</span>
+                          </div>
+                          <span className="text-[10px] font-bold text-rose-600 shrink-0">
+                            Due: {idx === 0 ? 'Aug 1' : `Aug ${idx + 2}`}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-slate-400 italic">No action items extracted.</p>
+                    )}
                   </div>
                 </div>
-                <button type="submit" className="w-full mt-2 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm">
-                  Confirm & Schedule
-                </button>
-              </form>
-            </div>
-
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-4">
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4">Recent Activity</h3>
-
-              <div className="space-y-4">
-                {isLoading ? (
-                  <p className="text-xs text-slate-400 font-medium py-6 text-center">Loading activities...</p>
-                ) : recentActivities.length === 0 ? (
-                  <p className="text-xs text-slate-400 font-medium py-6 text-center">No recent activities</p>
-                ) : (
-                  recentActivities.map((act) => {
-                    const ai = getActivityIcon(act.activity);
-                    const ActivityIcon = ai.Icon;
-                    return (
-                      <div key={act.id} className="flex items-start gap-3">
-                        <div className={`w-8 h-8 rounded-lg ${ai.bg} flex items-center justify-center shrink-0`}>
-                          <ActivityIcon className={`w-3.5 h-3.5 ${ai.color}`} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold text-slate-800 leading-snug">{act.activity}</p>
-                          <p className="text-[11px] font-medium text-slate-500 mt-0.5">{act.company}</p>
-                          <span className="text-[10px] text-slate-400 font-medium">{relativeTime(act.date)}</span>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
               </div>
-            </div>
-
-            {/* Sentiment from latest meeting (bottom of right column, matching PPT Slide 26 Dashboard) */}
-            {meetingData?.sentiment && (
-              <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-4">
-                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">Sentiment</h3>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center">
-                    <span className="text-2xl">😊</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-emerald-700">Positive</p>
-                    <p className="text-[11px] text-slate-500 font-medium mt-0.5">Customer is very interested in the solution.</p>
-                  </div>
-                </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                <Sparkles className="w-10 h-10 text-slate-200 mb-3" />
+                <p className="text-sm font-medium">No meeting analyzed yet.</p>
+                <p className="text-xs text-center max-w-xs mt-2">
+                  Go to "Call Intelligence" to process a sales call.
+                </p>
               </div>
             )}
+          </div>
 
-            {/* Deal Stage indicator (PPT Slide 26 bottom-right) */}
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-4">
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">Deal Stage</h3>
-              <p className="text-sm font-bold text-slate-800 mb-3">Prospecting</p>
-              <div className="flex items-center gap-1">
-                {['Prospecting', 'Contacted', 'Demo', 'Proposal', 'Negotiation', 'Won'].map((stage, idx) => (
-                  <div key={stage} className="flex items-center gap-1">
-                    <div className={`w-4 h-4 rounded-full border-2 ${
-                      idx === 0 
-                        ? 'bg-indigo-600 border-indigo-600' 
-                        : 'bg-white border-slate-300'
-                    }`}></div>
-                    {idx < 5 && <div className="w-4 h-0.5 bg-slate-200"></div>}
-                  </div>
-                ))}
+          {/* ============================================ */}
+          {/* BLOCK 3: Recent Activity                     */}
+          {/* ============================================ */}
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-5 flex flex-col h-full">
+            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-5">Recent Activity</h3>
+
+            <div className="space-y-5 flex-1 overflow-y-auto">
+              {isLoading ? (
+                <p className="text-xs text-slate-400 font-medium py-6 text-center">Loading activities...</p>
+              ) : recentActivities.length === 0 ? (
+                <p className="text-xs text-slate-400 font-medium py-6 text-center">No recent activities</p>
+              ) : (
+                recentActivities.map((act) => {
+                  const ai = getActivityIcon(act.activity);
+                  const ActivityIcon = ai.Icon;
+                  return (
+                    <div key={act.id} className="flex items-start gap-3.5">
+                      <div className={`w-9 h-9 rounded-xl ${ai.bg} flex items-center justify-center shrink-0 border border-slate-100`}>
+                        <ActivityIcon className={`w-4 h-4 ${ai.color}`} />
+                      </div>
+                      <div className="flex-1 min-w-0 pt-0.5">
+                        <p className="text-xs font-bold text-slate-800 leading-snug">{act.activity}</p>
+                        <p className="text-[11px] font-medium text-slate-500 mt-1">{act.company}</p>
+                        <span className="text-[10px] text-slate-400 font-medium">{relativeTime(act.date)}</span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          {/* ============================================ */}
+          {/* BLOCK 4: Schedule Meeting Form               */}
+          {/* ============================================ */}
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-5 flex flex-col h-full">
+            <div className="border-b border-slate-100 pb-4 mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+                  Schedule Meeting
+                </h3>
+                <p className="text-[11px] text-slate-500 font-medium mt-1">Book a call or demo</p>
               </div>
-              <div className="flex justify-between mt-1.5 px-0.5">
-                <span className="text-[8px] text-slate-400 font-medium">Prospect</span>
-                <span className="text-[8px] text-slate-400 font-medium">Won</span>
+              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+                <Calendar className="w-4 h-4" />
               </div>
             </div>
+            
+            <form className="space-y-4 flex-1 flex flex-col" onSubmit={(e) => { 
+              e.preventDefault(); 
+              showToast?.("Meeting scheduled successfully! Activity will be logged in DB shortly.", "success"); 
+              e.target.reset();
+            }}>
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1.5">Select Lead</label>
+                <select required className="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:border-indigo-500 font-medium text-slate-700">
+                  <option value="">-- Choose a Lead --</option>
+                  {leadsList.map(lead => (
+                    <option key={lead.id} value={lead.id}>{lead.contact_name} ({lead.company})</option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1.5">Date</label>
+                  <input type="date" required className="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:border-indigo-500 font-medium text-slate-700" />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1.5">Time</label>
+                  <input type="time" required className="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:border-indigo-500 font-medium text-slate-700" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1.5">Meeting Agenda</label>
+                <input type="text" placeholder="e.g. Product Demo, Pricing Discuss" required className="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:border-indigo-500 font-medium text-slate-700" />
+              </div>
+              
+              <div className="mt-auto pt-2">
+                <button type="submit" className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm">
+                  Confirm & Schedule
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* ============================================ */}
+          {/* BLOCK 5: Scheduled Meetings                  */}
+          {/* ============================================ */}
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-5 flex flex-col h-full">
+            <div className="border-b border-slate-100 pb-4 mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+                  Scheduled Meetings
+                </h3>
+                <p className="text-[11px] text-slate-500 font-medium mt-1">Upcoming calls and demos</p>
+              </div>
+              <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
+                <Video className="w-4 h-4" />
+              </div>
+            </div>
+
+            <div className="space-y-3 flex-1 overflow-y-auto">
+              {scheduledMeetings.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-slate-400 py-8">
+                  <CalendarCheck className="w-8 h-8 text-slate-200 mb-2" />
+                  <p className="text-xs font-medium">No meetings scheduled.</p>
+                </div>
+              ) : (
+                scheduledMeetings.map((mtg, idx) => (
+                  <div key={idx} className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 hover:border-indigo-300 transition-colors">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-xs font-bold text-slate-800">{mtg.company}</span>
+                      <span className="text-[9px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">Upcoming</span>
+                    </div>
+                    <p className="text-xs text-slate-600 font-medium mb-3">{mtg.activity}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <button className="flex-1 text-[10px] font-bold bg-white border border-slate-200 text-slate-700 py-1.5 rounded-lg hover:bg-slate-100 transition-colors">Reschedule</button>
+                      <button className="flex-1 text-[10px] font-bold bg-indigo-50 border border-indigo-100 text-indigo-700 py-1.5 rounded-lg hover:bg-indigo-100 transition-colors">Join Call</button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* ============================================ */}
+          {/* BLOCK 6: Sentiment & Deal Stage              */}
+          {/* ============================================ */}
+          <div className="flex flex-col gap-5 h-full">
+            
+            {/* Sentiment */}
+            <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-5 flex-1">
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Latest Sentiment</h3>
+              {meetingData?.sentiment ? (
+                <div className="flex items-center gap-4 bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
+                  <div className="w-14 h-14 rounded-2xl bg-emerald-100 border border-emerald-200 flex items-center justify-center shrink-0">
+                    <span className="text-3xl">😊</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-emerald-700 mb-1">Positive</p>
+                    <p className="text-xs text-slate-600 font-medium leading-snug">Customer is very interested in the solution and requested pricing.</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                  <div className="w-14 h-14 rounded-2xl bg-slate-200 flex items-center justify-center shrink-0">
+                    <span className="text-3xl">😐</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-500 mb-1">Unknown</p>
+                    <p className="text-xs text-slate-500 font-medium leading-snug">No recent meeting analyzed.</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Deal Stage */}
+            <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-5 flex-1">
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Pipeline Stage</h3>
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <p className="text-sm font-bold text-indigo-700 mb-3">Proposal Sent</p>
+                <div className="flex items-center gap-1 w-full">
+                  {['Prospect', 'Contacted', 'Demo', 'Proposal', 'Negotiation', 'Won'].map((stage, idx) => (
+                    <React.Fragment key={stage}>
+                      <div className={`w-4 h-4 rounded-full border-2 shrink-0 ${
+                        idx <= 3
+                          ? 'bg-indigo-600 border-indigo-600' 
+                          : 'bg-white border-slate-300'
+                      }`}></div>
+                      {idx < 5 && (
+                        <div className={`flex-1 h-1 ${
+                          idx < 3 ? 'bg-indigo-600' : 'bg-slate-200'
+                        }`}></div>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </div>
+                <div className="flex justify-between mt-2">
+                  <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Start</span>
+                  <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Close</span>
+                </div>
+              </div>
+            </div>
+
           </div>
 
         </div>
