@@ -318,7 +318,15 @@ def analyze_conversation_transcript(transcript: str) -> dict:
     competitors = []
 
     try:
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", "dummy-key"))
+        api_key = os.getenv("OPENAI_API_KEY") or os.getenv("LLM_API_KEY", "dummy-key")
+        base_url = os.getenv("OPENAI_BASE_URL") or os.getenv("LLM_BASE_URL", None)
+        model_name = os.getenv("LLM_MODEL") or os.getenv("OPENAI_MODEL", "glm-4.5")
+
+        client_kwargs = {"api_key": api_key}
+        if base_url:
+            client_kwargs["base_url"] = base_url
+
+        client = OpenAI(**client_kwargs)
         prompt = f"""
         Analyze this sales meeting transcript and extract the following in a structured way:
         1. Key Takeaways (list 2-3 short sentences).
@@ -330,7 +338,7 @@ def analyze_conversation_transcript(transcript: str) -> dict:
         Transcript: {transcript}
         """
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model=model_name,
             messages=[{"role": "user", "content": prompt}]
         )
         llm_response = response.choices[0].message.content.lower()
