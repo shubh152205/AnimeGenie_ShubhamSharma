@@ -54,6 +54,16 @@ def init_db():
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS meetings(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        meeting_id INTEGER UNIQUE,
+        lead_id INTEGER,
+        transcript TEXT,
+        summary TEXT,
+        sentiment TEXT
+    )
+    """)
     # Seed default leads if table is empty
     cursor.execute("SELECT COUNT(*) FROM leads")
     count = cursor.fetchone()[0]
@@ -69,6 +79,41 @@ def init_db():
         INSERT INTO leads (company, contact_name, designation, email, phone, industry, employees, revenue, location, funding, technology, score, stage, email_opens, website_visits, demo_request, converted, pain_point)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, mock_leads)
+
+    # Seed activities if empty (Milestone 3 — CRM Activity Log)
+    cursor.execute("SELECT COUNT(*) FROM activities")
+    act_count = cursor.fetchone()[0]
+    if act_count == 0:
+        seed_activities = [
+            (1, "2026-07-28", "Initial outreach email sent and opened", "Completed"),
+            (1, "2026-07-29", "Discovery call completed (45 min)", "Completed"),
+            (4, "2026-07-29", "Demo scheduled for Aug 1 at 2:00 PM", "Scheduled"),
+            (1, "2026-07-30", "Follow-up email opened by Sarah", "Completed"),
+            (2, "2026-07-30", "Technical team very interested in API capabilities", "Note Added"),
+            (4, "2026-07-27", "Contract draft sent for review", "Completed"),
+            (5, "2026-07-29", "Added to nurture email campaign", "Completed"),
+            (3, "2026-07-30", "Product brochure downloaded from website", "Completed"),
+        ]
+        cursor.executemany(
+            "INSERT INTO activities (lead_id, date, activity, status) VALUES (?, ?, ?, ?)",
+            seed_activities,
+        )
+
+    # Seed a sample meeting in meetings table (Milestone 3 — Conversation Intelligence)
+    cursor.execute("SELECT COUNT(*) FROM meetings")
+    mtg_count = cursor.fetchone()[0]
+    if mtg_count == 0:
+        cursor.execute(
+            """INSERT INTO meetings (meeting_id, lead_id, transcript, summary, sentiment)
+               VALUES (?, ?, ?, ?, ?)""",
+            (
+                1001,
+                1,
+                "Customer is interested in purchasing our AI analytics platform. They discussed data processing bottlenecks affecting customer experience. Need for real-time analytics and reporting capabilities. Budget approved for Q3 technology infrastructure upgrade. Competitive evaluation in progress with 2 other vendors. Requested pricing details. Follow-up next Tuesday.",
+                "Customer expressed strong interest in AI analytics platform. Budget approved for Q3. Competitive evaluation with 2 vendors in progress. Follow-up scheduled for next Tuesday.",
+                "Positive - High Intent",
+            ),
+        )
 
     # Seed default admin user (password: admin123)
     from hashlib import pbkdf2_hmac

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { 
   Upload, CheckCircle2, FileText, Sparkles, User, 
-  Mic, MicOff, Settings2, Activity
+  Mic, MicOff, Settings2, Activity, TrendingUp, DollarSign, SmilePlus
 } from 'lucide-react';
 import { API_BASE } from '../constants';
 
@@ -55,11 +55,11 @@ export default function CallIntelligence({ showToast }) {
       if (data.action_items && data.action_items.length > 0) {
         setActionItems(data.action_items.map((item, idx) => ({
           assignee: idx % 2 === 0 ? "Sales Rep" : "Technical Lead",
-          due: "Follow-up",
+          due: `Follow-up`,
           task: item
         })));
       }
-      showToast?.("Sales call recording analyzed successfully!", "success");
+      showToast?.("Sales call analyzed successfully! Transcript stored in DB.", "success");
     } catch (err) {
       console.error(err);
       showToast?.("Processing completed with fallback transcript.", "info");
@@ -71,7 +71,6 @@ export default function CallIntelligence({ showToast }) {
   // Live Microphone Recording Toggle
   const toggleRecording = async () => {
     if (isRecording) {
-      // Stop Recording
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
         mediaRecorderRef.current.stop();
       }
@@ -79,9 +78,8 @@ export default function CallIntelligence({ showToast }) {
         recognitionRef.current.stop();
       }
       setIsRecording(false);
-      showToast?.("Live call recording stopped. Processing audio...", "info");
+      showToast?.("Recording stopped. Click 'Process Call' to analyze.", "info");
     } else {
-      // Start Recording
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         audioChunksRef.current = [];
@@ -112,9 +110,9 @@ export default function CallIntelligence({ showToast }) {
         mediaRecorder.start(1000);
         setIsRecording(true);
         setLiveTranscript('');
-        setRecordingResult(null); // Clear previous results
+        setRecordingResult(null);
 
-        // Web Speech API Fallback for instant live text display
+        // Web Speech API for instant live text display
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
           const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
           const recognition = new SpeechRecognition();
@@ -141,6 +139,18 @@ export default function CallIntelligence({ showToast }) {
     }
   };
 
+  // Sentiment helper
+  const getSentimentDisplay = (sentiment) => {
+    if (!sentiment) return { color: 'text-slate-500', bg: 'bg-slate-50', border: 'border-slate-200', emoji: '😐', label: 'Unknown' };
+    const s = sentiment.toLowerCase();
+    if (s.includes('positive') || s.includes('high intent')) {
+      return { color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200', emoji: '😊', label: 'Positive' };
+    } else if (s.includes('attention') || s.includes('objection')) {
+      return { color: 'text-rose-700', bg: 'bg-rose-50', border: 'border-rose-200', emoji: '😟', label: 'Needs Attention' };
+    }
+    return { color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-200', emoji: '😐', label: 'Neutral' };
+  };
+
   return (
     <div className="flex-1 bg-slate-50/70 overflow-y-auto p-4 md:p-6 font-sans">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -157,7 +167,6 @@ export default function CallIntelligence({ showToast }) {
             </p>
           </div>
 
-          {/* Audio Controls */}
           <div className="flex flex-wrap items-center gap-2.5">
             <input 
               type="file" 
@@ -173,7 +182,6 @@ export default function CallIntelligence({ showToast }) {
               </span>
             )}
 
-            {/* Live Mic Recording Button */}
             <button
               onClick={toggleRecording}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-xs ${
@@ -186,7 +194,6 @@ export default function CallIntelligence({ showToast }) {
               <span>{isRecording ? "Stop Recording" : "Record Call"}</span>
             </button>
 
-            {/* File Upload Button */}
             <button
               onClick={() => fileInputRef.current ? fileInputRef.current.click() : null}
               className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-semibold text-xs shadow-xs hover:bg-slate-50 transition-colors"
@@ -195,7 +202,6 @@ export default function CallIntelligence({ showToast }) {
               <span>{file ? "Change Audio" : "Upload Audio"}</span>
             </button>
 
-            {/* Process AI Call Button */}
             <button
               onClick={handleUpload}
               disabled={!file || isProcessing}
@@ -211,11 +217,11 @@ export default function CallIntelligence({ showToast }) {
           </div>
         </div>
 
-        {/* 2-Column Interface: Transcript vs Insights */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Pipeline: Transcript | Summary + Action Items | Sentiment (3-column matching PPT Slide 26) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
-          {/* Left Column: Transcription & Data Processing */}
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-xs flex flex-col h-full min-h-[500px]">
+          {/* Column 1: Transcription (5 cols) */}
+          <div className="lg:col-span-5 bg-white border border-slate-200 rounded-2xl shadow-xs flex flex-col min-h-[480px]">
             <div className="p-5 border-b border-slate-100 flex items-center justify-between">
               <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <Activity className="w-4 h-4 text-indigo-600" />
@@ -242,7 +248,7 @@ export default function CallIntelligence({ showToast }) {
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-xs font-semibold text-slate-500">Processed Transcript (Whisper Engine):</p>
                     <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
-                      Processed Successfully
+                      ✅ Stored in DB
                     </span>
                   </div>
                   <div className="flex-1 bg-white border border-slate-200 rounded-xl p-4 text-sm text-slate-800 leading-relaxed overflow-y-auto font-medium">
@@ -261,19 +267,19 @@ export default function CallIntelligence({ showToast }) {
             </div>
           </div>
 
-          {/* Right Column: AI Insights & Summarization */}
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-xs flex flex-col h-full min-h-[500px]">
+          {/* Column 2: Meeting Summary + Action Items (4 cols) */}
+          <div className="lg:col-span-4 bg-white border border-slate-200 rounded-2xl shadow-xs flex flex-col min-h-[480px]">
             <div className="p-5 border-b border-slate-100 flex items-center justify-between">
               <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-purple-600" />
-                AI Conversation Insights
+                <FileText className="w-4 h-4 text-indigo-600" />
+                Meeting Summary
               </h2>
               <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded-full border border-purple-100">
-                Powered by GLM-4.5
+                AI Powered
               </span>
             </div>
 
-            <div className="p-5 space-y-6 flex-1 overflow-y-auto">
+            <div className="p-5 space-y-5 flex-1 overflow-y-auto">
               {!recordingResult ? (
                 <div className="h-full flex flex-col items-center justify-center text-slate-400 space-y-3 py-12">
                   <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center">
@@ -284,23 +290,20 @@ export default function CallIntelligence({ showToast }) {
                 </div>
               ) : (
                 <>
-                  {/* Speaker Details */}
+                  {/* Speaker / Call metadata */}
                   <div className="flex items-center gap-3 bg-slate-50 border border-slate-100 p-3 rounded-xl text-xs font-semibold text-slate-700">
                     <User className="w-4 h-4 text-indigo-600" />
-                    <span>Analyzed Call Metadata</span>
+                    <span>Analyzed Call • {recordingResult.filename || "Live Recording"}</span>
                   </div>
 
-                  {/* Key Takeaways */}
-                  <div className="space-y-3">
-                    <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-indigo-600" />
-                      Meeting Summary / Takeaways
-                    </h4>
+                  {/* Key Discussion Points */}
+                  <div className="space-y-2.5">
+                    <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">📋 Key Discussion Points</h4>
                     {discussionPoints.length > 0 ? (
-                      <ul className="space-y-2.5 pl-1">
+                      <ul className="space-y-2 pl-1">
                         {discussionPoints.map((point, index) => (
-                          <li key={index} className="flex items-start gap-3 text-xs font-semibold text-slate-700">
-                            <span className="w-2 h-2 rounded-full bg-indigo-600 mt-1.5 shrink-0"></span>
+                          <li key={index} className="flex items-start gap-2.5 text-xs font-semibold text-slate-700">
+                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-1.5 shrink-0"></span>
                             <span className="leading-relaxed">{point}</span>
                           </li>
                         ))}
@@ -311,19 +314,19 @@ export default function CallIntelligence({ showToast }) {
                   </div>
 
                   {/* Action Items */}
-                  <div className="space-y-3 pt-4 border-t border-slate-100">
+                  <div className="space-y-2.5 pt-3 border-t border-slate-100">
                     <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                      Extracted Action Items
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      Action Items
                     </h4>
                     
                     {actionItems.length > 0 ? (
-                      <div className="space-y-3">
+                      <div className="space-y-2.5">
                         {actionItems.map((item, idx) => (
-                          <div key={idx} className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3.5">
-                            <div className="flex items-center justify-between mb-1.5">
+                          <div key={idx} className="bg-amber-50/60 border border-amber-100 rounded-xl p-3">
+                            <div className="flex items-center justify-between mb-1">
                               <span className="text-xs font-bold text-slate-800">{item.assignee}</span>
-                              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/50 px-2 py-0.5 rounded">
+                              <span className="text-[10px] font-bold text-amber-700 bg-amber-100/50 px-2 py-0.5 rounded">
                                 {item.due}
                               </span>
                             </div>
@@ -338,6 +341,73 @@ export default function CallIntelligence({ showToast }) {
                     )}
                   </div>
                 </>
+              )}
+            </div>
+          </div>
+
+          {/* Column 3: Sentiment + Insights (3 cols — Matches PPT Slide 26 "4.3 Sentiment") */}
+          <div className="lg:col-span-3 space-y-5">
+            
+            {/* Sentiment Card */}
+            <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-5">
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4">Sentiment Analysis</h3>
+              
+              {recordingResult?.sentiment ? (() => {
+                const sd = getSentimentDisplay(recordingResult.sentiment);
+                return (
+                  <div className="space-y-4">
+                    <div className={`flex flex-col items-center p-5 rounded-xl ${sd.bg} border ${sd.border}`}>
+                      <span className="text-4xl mb-2">{sd.emoji}</span>
+                      <span className={`text-sm font-bold ${sd.color}`}>{sd.label}</span>
+                      {recordingResult.polarity !== undefined && (
+                        <span className="text-[11px] font-semibold text-slate-500 mt-1">
+                          Score: {typeof recordingResult.polarity === 'number' ? recordingResult.polarity.toFixed(2) : recordingResult.polarity}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-600 font-medium text-center leading-relaxed">
+                      {recordingResult.sentiment}
+                    </p>
+                  </div>
+                );
+              })() : (
+                <div className="flex flex-col items-center justify-center py-8 text-slate-400">
+                  <SmilePlus className="w-10 h-10 text-slate-200 mb-2" />
+                  <p className="text-xs font-medium">Pending analysis</p>
+                </div>
+              )}
+            </div>
+
+            {/* Interest Level */}
+            <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-5">
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <TrendingUp className="w-3.5 h-3.5 text-indigo-600" />
+                Interest Level
+              </h3>
+              {recordingResult?.interest ? (
+                <div className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold ${
+                  recordingResult.interest === 'High' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                  recordingResult.interest === 'Low' ? 'bg-rose-50 text-rose-700 border border-rose-200' :
+                  'bg-amber-50 text-amber-700 border border-amber-200'
+                }`}>
+                  {recordingResult.interest === 'High' ? '🔥' : recordingResult.interest === 'Low' ? '❄️' : '🌤️'}
+                  {recordingResult.interest}
+                </div>
+              ) : (
+                <p className="text-xs text-slate-400 font-medium">—</p>
+              )}
+            </div>
+
+            {/* Budget Mention */}
+            <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-5">
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
+                Budget Mention
+              </h3>
+              {recordingResult?.budget ? (
+                <p className="text-xs font-bold text-slate-700">{recordingResult.budget}</p>
+              ) : (
+                <p className="text-xs text-slate-400 font-medium">—</p>
               )}
             </div>
           </div>

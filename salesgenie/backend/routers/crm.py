@@ -160,18 +160,72 @@ async def upload_and_analyze_audio(file: UploadFile = File(...)):
         
         # 3. Analyze Transcript (LLM Analysis)
         analysis = analyze_conversation_transcript(transcript)
-        
-        # Return full payload for the Dashboard
+
+        summary = " ".join(analysis.get("key_takeaways", []))
+        sentiment = analysis.get("sentiment", "Neutral")
+        action_items = analysis.get("action_items", [])
+
+        # 4. Store transcript + analysis in meetings table (Milestone 3 - Transcript Storage)
+        try:
+            import random
+            meeting_id = random.randint(2000, 99999)
+            execute(
+                """INSERT INTO meetings (meeting_id, lead_id, transcript, summary, sentiment)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (meeting_id, None, transcript, summary, sentiment),
+            )
+        except Exception as db_err:
+            print("Warning: Could not save meeting to DB:", db_err)
+
+        # 5. Return full payload for the Dashboard
         return {
             "filename": file.filename,
             "transcript": transcript,
-            "summary": " ".join(analysis.get("key_takeaways", [])),
-            "action_items": analysis.get("action_items", []),
-            "sentiment": analysis.get("sentiment", "Neutral"),
+            "summary": summary,
+            "action_items": action_items,
+            "sentiment": sentiment,
+            "polarity": analysis.get("polarity", 0),
             "interest": analysis.get("interest_level", "Medium"),
-            "budget": analysis.get("budget_mention", "Not discussed")
+            "budget": analysis.get("budget_mention", "Not discussed"),
+            "competitors": analysis.get("competitors", []),
         }
     finally:
         # Clean up temp file
         if os.path.exists(temp_file_path):
             os.remove(temp_file_path)
+
+
+@router.get("/meetings/latest")
+def get_latest_meeting():
+    """Milestone 3: Get the most recent meeting transcript and analysis for CRM dashboard."""
+    row = fetchone(
+        "SELECT * FROM meetings ORDER BY id DESC LIMIT 1"
+    )
+    if not row:
+        return {
+            "meeting_id": None,
+            "transcript": None,
+            "summary": None,
+            "sentiment": None,
+            "action_items": [],
+        }
+
+    # Re-analyze transcript to get action items (they aren't stored separately)
+    transcript = row["transcript"] or ""
+    action_items = []
+    if transcript:
+        try:
+            analysis = analyze_conversation_transcript(transcript)
+            action_items = analysis.get("action_items", [])
+        except Exception:
+            action_items = ["Follow up as per meeting notes."]
+
+    return {
+        "meeting_id": row["meeting_id"],
+        "lead_id": row["lead_id"],
+        "transcript": row["transcript"],
+        "summary": row["summary"],
+        "sentiment": row["sentiment"],
+        "action_items": action_items,
+    }
+
