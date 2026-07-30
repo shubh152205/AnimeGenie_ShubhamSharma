@@ -378,7 +378,7 @@ def transcribe_audio(file_path: str) -> str:
         from faster_whisper import WhisperModel
         print("Running free local Faster-Whisper model...")
         model = WhisperModel("tiny", device="cpu", compute_type="int8")
-        segments, _ = model.transcribe(file_path, beam_size=5)
+        segments, _ = model.transcribe(file_path, beam_size=5, language="en")
         text = " ".join([segment.text for segment in segments]).strip()
         if text:
             print("Faster-Whisper Transcription Successful!")
@@ -391,7 +391,7 @@ def transcribe_audio(file_path: str) -> str:
         import whisper
         print("Running open-source PyTorch Whisper model...")
         model = whisper.load_model("tiny")
-        result = model.transcribe(file_path)
+        result = model.transcribe(file_path, language="en")
         if result and "text" in result and result["text"].strip():
             print("Local Whisper Transcription Successful!")
             return result["text"].strip()
