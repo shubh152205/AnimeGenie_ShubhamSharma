@@ -13,7 +13,7 @@ import shutil
 from ml_engine import analyze_conversation_transcript, transcribe_audio
 from database import fetchall, fetchone, execute
 
-router = APIRouter(tags=["CRM Integration & Conversation Intelligence"])
+router = APIRouter(prefix="/api", tags=["CRM Integration & Conversation Intelligence"])
 
 # In-memory customer cache as demonstrated in Milestone 3 slides
 _customers_cache = []
