@@ -12,4 +12,5 @@ passlib
 textblob
 sqlalchemy
 requests
+faster-whisper
 python-multipart

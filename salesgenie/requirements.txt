@@ -11,3 +11,4 @@ textblob
 sqlalchemy
 requests
 python-multipart
+faster-whisper

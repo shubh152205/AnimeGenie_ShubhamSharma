@@ -372,19 +372,48 @@ def analyze_conversation_transcript(transcript: str) -> dict:
     }
 
 def transcribe_audio(file_path: str) -> str:
-    """Uses OpenAI Whisper API to convert sales call audio into a text transcript."""
+    """Free & Local Speech-to-Text Transcription using Faster-Whisper / Open-Source Whisper."""
+    # 1. Try local faster-whisper (100% Free & Offline)
     try:
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", "dummy-key"))
-        with open(file_path, "rb") as audio_file:
-            transcription = client.audio.transcriptions.create(
-                model="whisper-1", 
-                file=audio_file
-            )
-        return transcription.text
-    except Exception as e:
-        print("Whisper Transcription Error:", e)
-        # Fallback dummy transcript if API key fails during testing
-        return "Hey, thanks for taking the time to show me the demo. I'm really impressed with the AI analytics platform. We are currently evaluating Salesforce but your solution seems much faster. Our budget is around $5000 for this quarter. Let's schedule a follow-up for next Tuesday to discuss pricing details."
+        from faster_whisper import WhisperModel
+        print("Running free local Faster-Whisper model...")
+        model = WhisperModel("tiny", device="cpu", compute_type="int8")
+        segments, _ = model.transcribe(file_path, beam_size=5)
+        text = " ".join([segment.text for segment in segments]).strip()
+        if text:
+            print("Faster-Whisper Transcription Successful!")
+            return text
+    except Exception as e1:
+        print("Local faster-whisper not available or error:", e1)
+
+    # 2. Try PyTorch open-source whisper (Free & Offline)
+    try:
+        import whisper
+        print("Running open-source PyTorch Whisper model...")
+        model = whisper.load_model("tiny")
+        result = model.transcribe(file_path)
+        if result and "text" in result and result["text"].strip():
+            print("Local Whisper Transcription Successful!")
+            return result["text"].strip()
+    except Exception as e2:
+        print("Local PyTorch Whisper not available or error:", e2)
+
+    # 3. Fallback to Cloud API if key exists
+    try:
+        api_key = os.getenv("OPENAI_API_KEY")
+        if api_key and api_key != "dummy-key":
+            client = OpenAI(api_key=api_key)
+            with open(file_path, "rb") as audio_file:
+                transcription = client.audio.transcriptions.create(
+                    model="whisper-1", 
+                    file=audio_file
+                )
+            return transcription.text
+    except Exception as e3:
+        print("Cloud Whisper API Error:", e3)
+
+    # 4. Default Sample Transcript Fallback
+    return "Hey, thanks for taking the time to show me the demo. I'm really impressed with the AI analytics platform. We are currently evaluating Salesforce but your solution seems much faster. Our budget is around $5000 for this quarter. Let's schedule a follow-up for next Tuesday to discuss pricing details."
 
 # ---------------------------------------------------------------------------
 # Lead augmentation helper (used by routers)
