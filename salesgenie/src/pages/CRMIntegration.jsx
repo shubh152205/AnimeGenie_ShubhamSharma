@@ -302,14 +302,32 @@ export default function CRMIntegration({ showToast }) {
               </div>
             </div>
             
-            <form className="space-y-4 flex-1 flex flex-col" onSubmit={(e) => { 
+            <form className="space-y-4 flex-1 flex flex-col" onSubmit={async (e) => { 
               e.preventDefault(); 
-              showToast?.("Meeting scheduled successfully! Activity will be logged in DB shortly.", "success"); 
-              e.target.reset();
+              const formData = new FormData(e.target);
+              const leadId = formData.get("lead_id");
+              const date = formData.get("date");
+              const time = formData.get("time");
+              const agenda = formData.get("agenda");
+
+              try {
+                const res = await fetch(`${API_BASE}/meetings/schedule`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ lead_id: leadId, date, time, agenda })
+                });
+                if (res.ok) {
+                  showToast?.("Meeting scheduled successfully!", "success");
+                  e.target.reset();
+                  fetchCrmData();
+                }
+              } catch (err) {
+                showToast?.("Failed to schedule meeting.", "error");
+              }
             }}>
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 mb-1.5">Select Lead</label>
-                <select required className="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:border-indigo-500 font-medium text-slate-700">
+                <select name="lead_id" required className="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:border-indigo-500 font-medium text-slate-700">
                   <option value="">-- Choose a Lead --</option>
                   {leadsList.map(lead => (
                     <option key={lead.id} value={lead.id}>{lead.contact_name} ({lead.company})</option>
@@ -319,16 +337,16 @@ export default function CRMIntegration({ showToast }) {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 mb-1.5">Date</label>
-                  <input type="date" required className="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:border-indigo-500 font-medium text-slate-700" />
+                  <input name="date" type="date" required className="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:border-indigo-500 font-medium text-slate-700" />
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 mb-1.5">Time</label>
-                  <input type="time" required className="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:border-indigo-500 font-medium text-slate-700" />
+                  <input name="time" type="time" required className="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:border-indigo-500 font-medium text-slate-700" />
                 </div>
               </div>
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 mb-1.5">Meeting Agenda</label>
-                <input type="text" placeholder="e.g. Product Demo, Pricing Discuss" required className="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:border-indigo-500 font-medium text-slate-700" />
+                <input name="agenda" type="text" placeholder="e.g. Product Demo, Pricing Discuss" required className="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:border-indigo-500 font-medium text-slate-700" />
               </div>
               
               <div className="mt-auto pt-2">

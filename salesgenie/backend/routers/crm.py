@@ -229,3 +229,35 @@ def get_latest_meeting():
         "action_items": action_items,
     }
 
+
+@router.post("/meetings/schedule")
+def schedule_meeting(data: Dict[str, Any] = Body(...)):
+    """Schedule a meeting with a lead and store it in activities table."""
+    lead_id = data.get("lead_id")
+    date_str = data.get("date", datetime.now().strftime("%Y-%m-%d"))
+    time_str = data.get("time", "10:00 AM")
+    agenda = data.get("agenda", "Meeting")
+    
+    lead = fetchone("SELECT company FROM leads WHERE id = ?", (lead_id,))
+    company = lead["company"] if lead else "Lead"
+    
+    activity_desc = f"{agenda} on {date_str} at {time_str}"
+    
+    execute(
+        "INSERT INTO activities (lead_id, date, activity, status) VALUES (?, ?, ?, ?)",
+        (lead_id, date_str, activity_desc, "Scheduled")
+    )
+    
+    return {
+        "status": "Success",
+        "message": "Meeting scheduled successfully",
+        "activity": {
+            "lead_id": lead_id,
+            "company": company,
+            "date": date_str,
+            "activity": activity_desc,
+            "status": "Scheduled"
+        }
+    }
+
+
