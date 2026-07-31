@@ -134,13 +134,13 @@ export default function CRMIntegration({ showToast }) {
           </div>
         </div>
 
-        {/* Improved 3-Column Grid Layout for Perfect Alignment */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {/* Independent 3-Column Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
 
           {/* ============================================ */}
           {/* BLOCK 1: CRM Sync Status                     */}
           {/* ============================================ */}
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-5 flex flex-col h-full">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-5 flex flex-col">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">CRM Sync Status</h3>
               <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
@@ -148,7 +148,7 @@ export default function CRMIntegration({ showToast }) {
               </span>
             </div>
 
-            <div className="relative flex-1 space-y-0">
+            <div className="relative space-y-0">
               {isLoading ? (
                 <p className="text-xs text-slate-400 font-medium py-6 text-center">Loading sync status...</p>
               ) : crmSyncCards.length === 0 ? (
@@ -187,7 +187,7 @@ export default function CRMIntegration({ showToast }) {
           {/* ============================================ */}
           {/* BLOCK 2: Meeting Summary                     */}
           {/* ============================================ */}
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-5 flex flex-col h-full">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-5 flex flex-col">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Meeting Summary</h3>
               <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-full border border-purple-100">
@@ -196,7 +196,7 @@ export default function CRMIntegration({ showToast }) {
             </div>
 
             {meetingData ? (
-              <div className="space-y-6 flex-1">
+              <div className="space-y-6">
                 {/* Speaker Info */}
                 <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 font-medium bg-slate-50 p-3 rounded-xl border border-slate-100">
                   <span className="flex items-center gap-1.5">
@@ -249,7 +249,7 @@ export default function CRMIntegration({ showToast }) {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center h-full text-slate-400">
+              <div className="flex flex-col items-center justify-center py-10 text-slate-400">
                 <Sparkles className="w-10 h-10 text-slate-200 mb-3" />
                 <p className="text-sm font-medium">No meeting analyzed yet.</p>
                 <p className="text-xs text-center max-w-xs mt-2">
@@ -262,10 +262,10 @@ export default function CRMIntegration({ showToast }) {
           {/* ============================================ */}
           {/* BLOCK 3: Recent Activity                     */}
           {/* ============================================ */}
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-5 flex flex-col h-full">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-5 flex flex-col">
             <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-5">Recent Activity</h3>
 
-            <div className="space-y-5 flex-1 overflow-y-auto">
+            <div className="space-y-4 max-h-[460px] overflow-y-auto pr-1">
               {isLoading ? (
                 <p className="text-xs text-slate-400 font-medium py-6 text-center">Loading activities...</p>
               ) : recentActivities.length === 0 ? (
@@ -275,13 +275,13 @@ export default function CRMIntegration({ showToast }) {
                   const ai = getActivityIcon(act.activity);
                   const ActivityIcon = ai.Icon;
                   return (
-                    <div key={act.id} className="flex items-start gap-3.5">
+                    <div key={act.id} className="flex items-start gap-3.5 p-2 rounded-xl hover:bg-slate-50 transition-colors">
                       <div className={`w-9 h-9 rounded-xl ${ai.bg} flex items-center justify-center shrink-0 border border-slate-100`}>
                         <ActivityIcon className={`w-4 h-4 ${ai.color}`} />
                       </div>
                       <div className="flex-1 min-w-0 pt-0.5">
                         <p className="text-xs font-bold text-slate-800 leading-snug">{act.activity}</p>
-                        <p className="text-[11px] font-medium text-slate-500 mt-1">{act.company}</p>
+                        <p className="text-[11px] font-medium text-slate-500 mt-0.5">{act.company}</p>
                         <span className="text-[10px] text-slate-400 font-medium">{relativeTime(act.date)}</span>
                       </div>
                     </div>
