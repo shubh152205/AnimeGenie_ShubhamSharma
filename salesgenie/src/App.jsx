@@ -3,6 +3,7 @@ import Toast from './components/Toast';
 import Sidebar from './components/Sidebar';
 import MobileTopBar from './components/MobileTopBar';
 import AuthModal from './components/AuthModal';
+import AuthPage from './pages/AuthPage';
 import LeadsExplorer from './pages/LeadsExplorer';
 import DealPipeline from './pages/DealPipeline';
 import AIOutreachGenerator from './pages/AIOutreachGenerator';
@@ -24,6 +25,7 @@ export default function App() {
   const { toast, showToast } = useToast();
   const {
     user,
+    token,
     isAuthModalOpen,
     setIsAuthModalOpen,
     authMode,
@@ -33,7 +35,6 @@ export default function App() {
     handleRegister,
     handleLogout
   } = useAuth({ showToast });
-
 
   // Leads list state & fetch
   const [searchQuery, setSearchQuery] = useState("");
@@ -69,7 +70,6 @@ export default function App() {
     handleGenerateOutreach, copyToClipboard
   } = useOutreach({ showToast });
 
-
   // Sync outreach lead selection
   useEffect(() => {
     if (leads.length > 0 && !outreachLeadId) {
@@ -81,6 +81,22 @@ export default function App() {
     setActiveTab(name);
     setSidebarOpen(false);
   };
+
+  // If user is not authenticated via JWT token, show mandatory Auth Gateway
+  if (!token || !user) {
+    return (
+      <div className="flex h-screen w-screen overflow-hidden bg-[#0f172a] text-slate-800 antialiased">
+        <Toast message={toast?.message} />
+        <AuthPage
+          authMode={authMode}
+          setAuthMode={setAuthMode}
+          onLogin={handleLogin}
+          onRegister={handleRegister}
+          loading={authLoading}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#f8fafc] text-slate-800 antialiased selection:bg-indigo-100 selection:text-indigo-900">
@@ -112,7 +128,6 @@ export default function App() {
         onOpenAuth={() => setIsAuthModalOpen(true)}
         onLogout={handleLogout}
       />
-
 
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
@@ -181,7 +196,6 @@ export default function App() {
             <AnalyticsDashboard
               analytics={analytics}
               loadingAnalytics={loadingAnalytics}
-              fetchAnalytics={fetchAnalytics}
             />
           )}
         </div>
