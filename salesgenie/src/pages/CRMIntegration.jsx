@@ -148,7 +148,7 @@ export default function CRMIntegration({ showToast }) {
               </span>
             </div>
 
-            <div className="relative flex-1 space-y-0 before:absolute before:left-[18px] before:top-4 before:bottom-4 before:w-0.5 before:bg-slate-200">
+            <div className="relative flex-1 space-y-0">
               {isLoading ? (
                 <p className="text-xs text-slate-400 font-medium py-6 text-center">Loading sync status...</p>
               ) : crmSyncCards.length === 0 ? (
@@ -156,8 +156,13 @@ export default function CRMIntegration({ showToast }) {
               ) : (
                 crmSyncCards.map((card, idx) => {
                   const CardIcon = card.Icon;
+                  const isLast = idx === crmSyncCards.length - 1;
                   return (
                     <div key={idx} className="relative pl-12 py-3.5">
+                      {/* Clean Connector Line connecting icon nodes only */}
+                      {!isLast && (
+                        <div className="absolute left-[19px] top-7 bottom-0 w-0.5 bg-slate-200" />
+                      )}
                       <div className={`absolute left-1 top-3 w-8 h-8 rounded-full ${card.bg} border ${card.border} flex items-center justify-center z-10`}>
                         <CardIcon className={`w-3.5 h-3.5 ${card.color}`} />
                       </div>
