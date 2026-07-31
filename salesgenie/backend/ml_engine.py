@@ -329,24 +329,21 @@ def analyze_conversation_transcript(transcript: str) -> dict:
 
     interest_level = "High" if polarity > 0.1 or "demo" in transcript.lower() or "impressed" in transcript.lower() else "Medium"
 
-    # 3. LLM Model (GLM-4.5 / GLM-5.2 / OpenAI API) & Dynamic NLP Extraction
+    # 3. LLM Model (NVIDIA meta/llama-3.3-70b-instruct / GLM-4.5) & Dynamic NLP Extraction
     takeaways = []
     action_items = []
-    used_model = "GLM-4.5 / GLM-5.2"
+    used_model = "NVIDIA meta/llama-3.3-70b-instruct"
 
     try:
-        api_key = os.getenv("OPENAI_API_KEY") or os.getenv("LLM_API_KEY") or os.getenv("ZHIPU_API_KEY")
-        base_url = os.getenv("OPENAI_BASE_URL") or os.getenv("LLM_BASE_URL")
-        model_name = os.getenv("LLM_MODEL") or "glm-4.5"
+        api_key = os.getenv("NVIDIA_API_KEY") or os.getenv("OPENAI_API_KEY") or "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"
+        base_url = os.getenv("NVIDIA_BASE_URL") or os.getenv("OPENAI_BASE_URL") or "https://integrate.api.nvidia.com/v1"
+        model_name = os.getenv("LLM_MODEL") or "meta/llama-3.3-70b-instruct"
 
         if api_key and api_key != "dummy-key":
-            client_kwargs = {"api_key": api_key}
-            if base_url:
-                client_kwargs["base_url"] = base_url
-
+            client_kwargs = {"api_key": api_key, "base_url": base_url}
             client = OpenAI(**client_kwargs)
             prompt = f"""
-            You are SalesGenie AI operating GLM-4.5 / GLM-5.2 Conversation Intelligence Engine.
+            You are SalesGenie AI operating NVIDIA meta/llama-3.3-70b-instruct Conversation Intelligence Engine.
             Analyze this sales meeting transcript and extract:
             - 2 to 3 concise Key Discussion Takeaways.
             - 2 to 3 clear Action Items with next steps.
@@ -359,7 +356,10 @@ def analyze_conversation_transcript(transcript: str) -> dict:
             response = client.chat.completions.create(
                 model=model_name,
                 messages=[{"role": "user", "content": prompt}],
-                temperature=0.2
+                temperature=0.2,
+                top_p=0.7,
+                max_tokens=1024,
+                stream=False
             )
             content = response.choices[0].message.content.strip()
             if "{" in content and "}" in content:
@@ -370,7 +370,7 @@ def analyze_conversation_transcript(transcript: str) -> dict:
                 if parsed.get("action_items"):
                     action_items = parsed["action_items"]
     except Exception as llm_err:
-        print("GLM-4.5 / LLM API call fallback to NLP extraction:", llm_err)
+        print("NVIDIA meta/llama-3.3-70b-instruct API call fallback to NLP extraction:", llm_err)
 
     # 4. Dynamic NLP Extraction fallback if LLM array is empty
     if not takeaways:

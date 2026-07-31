@@ -10,9 +10,9 @@ from openai import OpenAI
 router = APIRouter(prefix="/api", tags=["Outreach"])
 
 # Initialize NVIDIA OpenAI Client as requested
-NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY", "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")
+NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY", "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")
 NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1"
-MODEL_NAME = "meta/llama-3.1-8b-instruct"
+MODEL_NAME = os.getenv("LLM_MODEL", "meta/llama-3.3-70b-instruct")
 
 client = None
 try:
@@ -25,7 +25,7 @@ except Exception as e:
 
 
 def generate_nvidia_ai_outreach(lead: dict, channel: str, tone: str, sender_name: str = None) -> dict:
-    """Use NVIDIA meta/llama-3.1-8b-instruct API (non-streaming) to generate AI outreach message."""
+    """Use NVIDIA meta/llama-3.3-70b-instruct API (non-streaming) to generate AI outreach message."""
     if not client:
         return None
 

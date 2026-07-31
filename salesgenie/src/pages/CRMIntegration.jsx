@@ -190,8 +190,8 @@ export default function CRMIntegration({ showToast }) {
           <div className="bg-white border border-slate-200 rounded-2xl shadow-xs p-5 flex flex-col">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Meeting Summary</h3>
-              <span className="text-[10px] font-bold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-full border border-purple-200 flex items-center gap-1 shadow-2xs">
-                <Sparkles className="w-3 h-3 text-purple-600 animate-pulse" /> GLM-4.5 / 5.2 AI
+              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1 shadow-2xs">
+                <Sparkles className="w-3 h-3 text-emerald-600 animate-pulse" /> NVIDIA Llama-3.3-70B AI
               </span>
             </div>
 
@@ -216,7 +216,7 @@ export default function CRMIntegration({ showToast }) {
                 <div>
                   <h4 className="text-xs font-bold text-slate-800 mb-3 uppercase tracking-wider flex items-center justify-between">
                     <span>📋 Key Discussion</span>
-                    <span className="text-[10px] text-slate-400 font-normal">GLM-4.5 Analysis</span>
+                    <span className="text-[10px] text-slate-400 font-normal">NVIDIA Llama-3.3-70B</span>
                   </h4>
                   <ul className="space-y-3">
                     {((meetingData.summary || "").split('. ').filter(Boolean)).map((point, i) => (
