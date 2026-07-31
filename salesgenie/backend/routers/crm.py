@@ -74,7 +74,7 @@ def get_crm_sync_status():
         SELECT a.id, a.date, a.activity, a.status, l.company, l.contact_name 
         FROM activities a 
         JOIN leads l ON a.lead_id = l.id 
-        ORDER BY a.id DESC LIMIT 5
+        ORDER BY a.id DESC LIMIT 15
     """)
     recent_activities = []
     for act in activities:
