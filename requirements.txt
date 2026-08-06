@@ -1,0 +1,14 @@
+fastapi>=0.115.0
+uvicorn
+pandas
+scikit-learn
+pytest
+httpx
+openai
+pyjwt
+passlib
+textblob
+sqlalchemy
+requests
+python-multipart
+faster-whisper

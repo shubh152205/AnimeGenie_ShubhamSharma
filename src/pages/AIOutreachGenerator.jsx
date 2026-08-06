@@ -1,0 +1,207 @@
+import { useState, useEffect } from 'react';
+import { Sparkles, Copy, RefreshCw, FileText, Mail, Phone, User } from 'lucide-react';
+import { OUTREACH_CHANNELS } from '../constants';
+
+export default function AIOutreachGenerator({
+  leads = [], outreachLeadId = "", setOutreachLeadId,
+  outreachChannel = "Email", setOutreachChannel,
+  outreachTone = "Persuasive", setOutreachTone,
+  senderName = "", setSenderName,
+  generatedOutreach, generatingOutreach,
+  onGenerate, onCopy
+}) {
+
+  const [typedMessage, setTypedMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+
+  const OUTREACH_TONES = [
+    { val: "Professional", label: "👔 Professional" },
+    { val: "Persuasive", label: "🎯 Persuasive" },
+    { val: "Friendly", label: "😊 Friendly" },
+    { val: "Urgent", label: "⚡ Urgent" }
+  ];
+
+  // ChatGPT/Gemini style typing animation effect
+  useEffect(() => {
+    if (!generatedOutreach?.message) {
+      setTypedMessage("");
+      setIsTyping(false);
+      return;
+    }
+
+    const text = generatedOutreach.message;
+    setTypedMessage("");
+    setIsTyping(true);
+
+    let idx = 0;
+    const timer = setInterval(() => {
+      idx += 3; // Fast, natural character stream
+      if (idx >= text.length) {
+        setTypedMessage(text);
+        setIsTyping(false);
+        clearInterval(timer);
+      } else {
+        setTypedMessage(text.slice(0, idx));
+      }
+    }, 15);
+
+    return () => clearInterval(timer);
+  }, [generatedOutreach]);
+
+  return (
+    <div className="flex-1 flex flex-col bg-[#f8fafc] overflow-y-auto p-4 md:p-6">
+      <div className="border-b border-slate-200 pb-4 mb-6">
+        <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">AI Outreach Generator</h2>
+        <p className="text-xs text-slate-500 font-medium">Compose personalized outreach messages, email pitches, and LinkedIn messages tailored to prospects</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        {/* Setup Panel */}
+        <div className="lg:col-span-1 bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4 shadow-slate-200/50">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-2">Outreach Settings</h3>
+
+          {/* Sender Name Section */}
+          <div>
+            <label className="block text-[10px] font-extrabold uppercase text-slate-400 mb-1.5 flex items-center gap-1">
+              <User className="h-3 w-3 text-indigo-500" /> Your Name (Sender Name)
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Shubham Sharma"
+              value={senderName || ''}
+              onChange={(e) => setSenderName?.(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 p-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500 placeholder:text-slate-400"
+            />
+          </div>
+
+          {/* Select Lead */}
+          <div>
+            <label className="block text-[10px] font-extrabold uppercase text-slate-400 mb-1.5">Select Target Lead</label>
+            <select
+              value={outreachLeadId}
+              onChange={(e) => setOutreachLeadId(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 p-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500"
+            >
+              {(leads || []).map(lead => (
+                <option key={lead.id} value={lead.id}>{lead.company} ({lead.contact_name})</option>
+              ))}
+
+            </select>
+          </div>
+
+          {/* Channel */}
+          <div>
+            <label className="block text-[10px] font-extrabold uppercase text-slate-400 mb-1.5">Outreach Channel</label>
+            <div className="grid grid-cols-2 gap-1.5">
+              {OUTREACH_CHANNELS.map(ch => (
+                <button
+                  key={ch.val}
+                  onClick={() => setOutreachChannel(ch.val)}
+                  className={`rounded-lg py-2 text-[10.5px] font-bold border transition-all ${
+                    outreachChannel === ch.val
+                      ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
+                      : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  {ch.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Pitch Strategy / Tone */}
+          <div>
+            <label className="block text-[10px] font-extrabold uppercase text-slate-400 mb-1.5">AI Pitch Strategy</label>
+            <div className="grid grid-cols-2 gap-1.5">
+              {OUTREACH_TONES.map(t => (
+                <button
+                  key={t.val}
+                  onClick={() => setOutreachTone(t.val)}
+                  className={`rounded-lg py-2 text-[10.5px] font-bold border transition-all ${
+                    outreachTone === t.val
+                      ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
+                      : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button
+            onClick={onGenerate}
+            disabled={generatingOutreach}
+            className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 p-3 text-xs font-bold text-white shadow-md shadow-indigo-600/15 hover:bg-indigo-700 transition-colors disabled:opacity-50"
+          >
+            {generatingOutreach ? (
+              <RefreshCw className="h-4.5 w-4.5 animate-spin" />
+            ) : (
+              <Sparkles className="h-4.5 w-4.5" />
+            )}
+            <span>{generatingOutreach ? "Generating Pitch..." : "Generate AI Outreach"}</span>
+          </button>
+        </div>
+
+        {/* Output Panel */}
+        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-5 shadow-xs min-h-[420px]">
+          {generatedOutreach ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                <div className="flex items-center gap-2 text-xs font-bold flex-wrap">
+                  <FileText className="h-4 w-4 text-indigo-500" />
+                  <span className="text-slate-600">Generated:</span>
+                  <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded text-[10px]">{generatedOutreach.channel}</span>
+                  <span className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded text-[10px]">{generatedOutreach.tone}</span>
+                  {generatedOutreach.ai_generated && (
+                    <span className="bg-emerald-50 text-emerald-700 border border-emerald-200/80 px-2 py-0.5 rounded text-[9.5px] font-extrabold flex items-center gap-1">
+                      <Sparkles className="h-3 w-3 text-emerald-500" /> {generatedOutreach.model || "meta/llama-3.1-8b-instruct"}
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  onClick={() => onCopy?.(generatedOutreach.message)}
+                  className="flex items-center gap-1 text-[10px] font-bold text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded transition-colors"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                  <span>Copy</span>
+                </button>
+              </div>
+
+              {generatedOutreach.subject && (
+                <div className="bg-amber-50/50 border border-amber-100 rounded-lg p-2.5 text-[11px] font-semibold text-slate-700">
+                  <span className="text-[9px] font-extrabold text-amber-600 uppercase">Subject: </span>
+                  {generatedOutreach.subject}
+                </div>
+              )}
+
+              {/* Typing Animation Area */}
+              <pre className="text-[11.5px] leading-relaxed text-slate-700 whitespace-pre-wrap font-sans bg-slate-50/50 p-4 rounded-xl border border-slate-100 min-h-[220px] relative shadow-inner">
+                {typedMessage}
+                {isTyping && (
+                  <span className="inline-block w-2 h-4 ml-1 bg-indigo-600 animate-pulse align-middle rounded-xs" />
+                )}
+              </pre>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+              <div className="h-14 w-14 rounded-xl bg-indigo-50 flex items-center justify-center mb-4">
+                <Mail className="h-7 w-7 text-indigo-400" />
+              </div>
+              <p className="text-sm font-extrabold text-slate-700">AI Outreach Not Generated Yet</p>
+              <p className="text-[11px] text-slate-400 font-medium mt-1 max-w-xs">
+                Enter your name on the left, select a target lead, and click "Generate AI Outreach" to watch the real-time AI typing animation.
+              </p>
+              <div className="flex gap-4 mt-5 text-[10px] font-bold text-slate-400">
+                <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> Multi-Channel</span>
+                <span className="flex items-center gap-1"><FileText className="h-3 w-3" /> Strategy Control</span>
+                <span className="flex items-center gap-1"><Sparkles className="h-3 w-3" /> AI Typing Stream</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
