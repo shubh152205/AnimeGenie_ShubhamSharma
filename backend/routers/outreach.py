@@ -18,10 +18,12 @@ client = None
 try:
     client = OpenAI(
         base_url=NVIDIA_BASE_URL,
-        api_key=NVIDIA_API_KEY
+        api_key=NVIDIA_API_KEY,
+        timeout=8.0
     )
 except Exception as e:
     print(f"NVIDIA API Client initialization warning: {e}")
+
 
 
 def generate_nvidia_ai_outreach(lead: dict, channel: str, tone: str, sender_name: str = None) -> dict:

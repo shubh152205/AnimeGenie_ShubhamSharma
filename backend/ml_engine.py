@@ -340,8 +340,9 @@ def analyze_conversation_transcript(transcript: str) -> dict:
         model_name = os.getenv("LLM_MODEL") or "meta/llama-3.3-70b-instruct"
 
         if api_key and api_key != "dummy-key":
-            client_kwargs = {"api_key": api_key, "base_url": base_url}
+            client_kwargs = {"api_key": api_key, "base_url": base_url, "timeout": 8.0}
             client = OpenAI(**client_kwargs)
+
             prompt = f"""
             You are SalesGenie AI operating NVIDIA meta/llama-3.3-70b-instruct Conversation Intelligence Engine.
             Analyze this sales meeting transcript and extract:
