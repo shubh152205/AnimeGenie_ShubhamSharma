@@ -15,6 +15,7 @@ Modern sales teams spend a significant amount of time researching prospects, ana
 - Automated lead scoring based on conversion probability
 - AI-generated follow-up strategies and sales recommendations
 - Sales performance analytics and business intelligence dashboard
+- Secure JWT (JSON Web Token) user authentication & session management
 
 ---
 
@@ -30,7 +31,6 @@ graph TD
     B -->|Draft Outreaches| F[Personalized Outreach Engine]
     B -->|Score Leads| G[Rule-Based Scoring Engine]
 ```
-
 
 ---
 
@@ -150,61 +150,6 @@ Sales performance analytics and business intelligence dashboard with key metrics
 
 ---
 
-## 📂 Project Structure
-
-```
-salesgenie/
-├── backend/                       # Python FastAPI Backend
-│   ├── server.py                  # FastAPI app entry point
-│   ├── database.py                # SQLite connection helpers
-│   ├── models.py                  # Pydantic request models
-│   ├── ml_engine.py               # ML scoring & TF-IDF engine
-│   ├── create_db.py               # Database seeder with mock B2B leads
-│   ├── requirements.txt           # Python dependencies
-│   ├── sales.db                   # SQLite database
-│   └── routers/
-│       ├── leads.py               # Leads CRUD + activity logging (M1, M5)
-│       ├── outreach.py            # AI outreach generation (M3)
-│       └── analytics.py           # Sales analytics aggregation (M6)
-├── src/                           # React Frontend
-│   ├── App.jsx                    # Main app with tab routing
-│   ├── constants.js               # Shared config & constants
-│   ├── pages/
-│   │   ├── LeadsExplorer.jsx      # Lead list + detail view (M1)
-│   │   ├── LeadDetailView.jsx     # Single lead panel (M1, M2)
-│   │   ├── DealPipeline.jsx       # Kanban sales pipeline (M1)
-│   │   ├── AIOutreachGenerator.jsx # Outreach composer (M3)
-│   │   └── AnalyticsDashboard.jsx # Sales analytics charts (M6)
-│   ├── components/
-│   │   ├── Sidebar.jsx            # Navigation sidebar
-│   │   ├── LeadCard.jsx           # Lead list card
-│   │   ├── LeadFilters.jsx        # Search & filter controls
-│   │   ├── LeadRegisterForm.jsx   # New lead registration form
-│   │   ├── CompanyInfo.jsx        # Company profile display (M1)
-│   │   ├── ScoreGauge.jsx         # Circular score meter (M4)
-│   │   ├── MLConversionCard.jsx   # ML probability display (M4)
-│   │   ├── TechAlignmentCard.jsx  # Tech stack alignment (M2)
-│   │   ├── SimilarDeals.jsx       # TF-IDF similar deals (M2)
-│   │   ├── ActivityTimeline.jsx   # Activity history log (M5)
-│   │   ├── AIBanner.jsx           # AI recommendations banner
-│   │   ├── MobileTopBar.jsx       # Mobile responsive header
-│   │   └── Toast.jsx              # Notification system
-│   └── hooks/                     # Custom React hooks
-│       ├── useLeads.js            # Leads list state management
-│       ├── useLeadDetail.js       # Lead detail fetching
-│       ├── useLeadActions.js      # Activity/stage/delete actions
-│       ├── useAnalytics.js        # Analytics data fetching
-│       ├── useOutreach.js         # Outreach generation
-│       └── useToast.js            # Toast notifications
-├── index.html                     # HTML entry point
-├── package.json                   # Node dependencies
-├── vite.config.js                 # Vite configuration
-├── tailwind.config.js             # Tailwind CSS configuration
-└── postcss.config.js              # PostCSS configuration
-```
-
----
-
 ## 🔐 How to Find & Use the JWT Sign-In Screen
 
 1. **Location in UI**: Look at the **bottom of the left navigation sidebar** (`Sidebar.jsx`).
@@ -219,7 +164,6 @@ salesgenie/
 ---
 
 ## 🚀 How to Run the Project
-
 
 ### Prerequisites
 - Python 3.8+
@@ -240,23 +184,6 @@ npm install
 npm run dev
 ```
 *Open `http://localhost:5173/` in your browser to view the application.*
-
----
-
-## 🌟 Key Features Summary
-
-| Feature | Module | Description |
-|---------|--------|-------------|
-| 🔍 Leads Explorer | M1 | Search, filter, sort prospects by industry/stage/score |
-| 📋 Deal Pipeline Kanban | M1 | Visual 6-column sales stage tracker |
-| 🤖 AI Outreach Generator | M3 | Multi-channel, multi-tone personalized messages |
-| 📊 Analytics Dashboard | M6 | 5 KPI cards + 5 chart panels |
-| 🧠 ML Lead Scoring | M4 | RandomForest conversion prediction |
-| 🔗 TF-IDF Deal Matching | M2 | Similar converted deals finder |
-| 🎯 Tech Stack Alignment | M2 | Product compatibility scoring |
-| 👤 Decision Maker ID | M2 | Contact role classification |
-| ⏱️ Activity Timeline | M5 | Engagement logging with auto-progression |
-| 📝 Lead Registration | M1 | Full CRUD with auto-scoring |
 
 ---
 

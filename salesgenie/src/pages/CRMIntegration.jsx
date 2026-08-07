@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Database, RefreshCw, CheckCircle2, User, Mail, Clock, Send, 
   Sparkles, ExternalLink, MessageSquare, Phone, CalendarCheck, 
-  StickyNote, ArrowRight, Zap, Calendar, Video
+  StickyNote, ArrowRight, Zap, Calendar, Video, Trash2, Check
 } from 'lucide-react';
 import { API_BASE } from '../constants';
 
@@ -50,6 +50,34 @@ export default function CRMIntegration({ showToast }) {
   useEffect(() => {
     fetchCrmData();
   }, []);
+
+  const handleDeleteActivity = async (id) => {
+    try {
+      const res = await fetch(`${API_BASE}/activities/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        showToast?.("Scheduled meeting removed successfully!", "success");
+        fetchCrmData();
+      }
+    } catch (err) {
+      showToast?.("Failed to delete activity", "error");
+    }
+  };
+
+  const handleCompleteActivity = async (id) => {
+    try {
+      const res = await fetch(`${API_BASE}/activities/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'Completed' })
+      });
+      if (res.ok) {
+        showToast?.("Meeting marked as completed!", "success");
+        fetchCrmData();
+      }
+    } catch (err) {
+      showToast?.("Failed to update meeting status", "error");
+    }
+  };
 
   // Filter scheduled meetings from activities
   const scheduledMeetings = recentActivities.filter(act => act.status === 'Scheduled');
@@ -280,15 +308,45 @@ export default function CRMIntegration({ showToast }) {
                 recentActivities.map((act) => {
                   const ai = getActivityIcon(act.activity);
                   const ActivityIcon = ai.Icon;
+                  const isCompleted = act.status === 'Completed';
                   return (
-                    <div key={act.id} className="flex items-start gap-3.5 p-2 rounded-xl hover:bg-slate-50 transition-colors">
-                      <div className={`w-9 h-9 rounded-xl ${ai.bg} flex items-center justify-center shrink-0 border border-slate-100`}>
-                        <ActivityIcon className={`w-4 h-4 ${ai.color}`} />
+                    <div key={act.id} className="flex items-center justify-between gap-3 p-2.5 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-colors group">
+                      <div className="flex items-start gap-3 min-w-0 flex-1">
+                        <div className={`w-9 h-9 rounded-xl ${ai.bg} flex items-center justify-center shrink-0 border border-slate-100`}>
+                          <ActivityIcon className={`w-4 h-4 ${ai.color}`} />
+                        </div>
+                        <div className="flex-1 min-w-0 pt-0.5">
+                          <div className="flex items-center gap-2">
+                            <p className={`text-xs font-bold leading-snug ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-800'}`}>{act.activity}</p>
+                            <span className={`text-[9px] font-extrabold px-1.5 py-0.2 rounded shrink-0 ${
+                              isCompleted ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
+                            }`}>
+                              {act.status}
+                            </span>
+                          </div>
+                          <p className="text-[11px] font-medium text-slate-500 mt-0.5">{act.company}</p>
+                          <span className="text-[10px] text-slate-400 font-medium">{relativeTime(act.date)}</span>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0 pt-0.5">
-                        <p className="text-xs font-bold text-slate-800 leading-snug">{act.activity}</p>
-                        <p className="text-[11px] font-medium text-slate-500 mt-0.5">{act.company}</p>
-                        <span className="text-[10px] text-slate-400 font-medium">{relativeTime(act.date)}</span>
+                      <div className="flex items-center gap-1 shrink-0">
+                        {!isCompleted && (
+                          <button
+                            type="button"
+                            onClick={() => handleCompleteActivity(act.id)}
+                            title="Mark as Completed"
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+                          >
+                            <Check className="w-4 h-4" />
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteActivity(act.id)}
+                          title="Delete Scheduled Meeting / Activity"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
                   );

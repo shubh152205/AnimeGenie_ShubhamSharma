@@ -261,3 +261,19 @@ def schedule_meeting(data: Dict[str, Any] = Body(...)):
     }
 
 
+@router.delete("/activities/{activity_id}")
+def delete_activity(activity_id: int):
+    """Delete a scheduled meeting or activity from database."""
+    execute("DELETE FROM activities WHERE id = ?", (activity_id,))
+    return {"status": "Success", "message": f"Activity {activity_id} removed"}
+
+
+@router.patch("/activities/{activity_id}/status")
+def update_activity_status(activity_id: int, data: Dict[str, Any] = Body(...)):
+    """Update status of a scheduled meeting (e.g. Completed or Cancelled)."""
+    new_status = data.get("status", "Completed")
+    execute("UPDATE activities SET status = ? WHERE id = ?", (new_status, activity_id))
+    return {"status": "Success", "message": f"Activity {activity_id} marked as {new_status}"}
+
+
+

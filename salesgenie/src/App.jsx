@@ -80,6 +80,9 @@ export default function App() {
   const handleTabChange = (name) => {
     setActiveTab(name);
     setSidebarOpen(false);
+    if (name === "Analytics Dashboard") {
+      fetchAnalytics();
+    }
   };
 
   // If user is not authenticated via JWT token, show mandatory Auth Gateway
@@ -196,6 +199,7 @@ export default function App() {
             <AnalyticsDashboard
               analytics={analytics}
               loadingAnalytics={loadingAnalytics}
+              fetchAnalytics={fetchAnalytics}
             />
           )}
         </div>

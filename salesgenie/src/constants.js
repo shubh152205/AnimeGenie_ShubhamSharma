@@ -1,6 +1,6 @@
-export const API_BASE = import.meta.env.VITE_API_URL 
-  ? `${import.meta.env.VITE_API_URL}/api` 
-  : "http://127.0.0.1:8000/api";
+const rawApiUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/+$/, "") : "http://127.0.0.1:8000";
+export const API_BASE = `${rawApiUrl}/api`;
+
 
 export const SALES_STAGES = [
   { id: "Lead", label: "New Lead", color: "bg-slate-100 border-slate-200 text-slate-700", dot: "bg-slate-400" },
